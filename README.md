@@ -29,9 +29,9 @@ In India's rural and tribal heartlands, millions of students encounter severe sy
 | :--- | :--- |
 | **No/poor internet?** | **Offline-first PWA architecture** with IndexedDB & Service Worker local caching. |
 | **Slow or expensive data?** | **Low-Data Mode** that eliminates heavy animations, disables autoplay, and serves minimal text/vector assets. |
-| **English difficult?** | **Bilingual interface & dual-language curriculum** in clear Hindi and English. |
-| **Typing difficult?** | **Browser Web Speech API** for hands-free voice questioning and audio "Read Aloud". |
-| **Stuck on a concept?** | **EduSaarthi AI Tutor** (powered by Gemini) delivering simple, everyday analogies without jargon. |
+| **English difficult?** | **Multilingual Engine & regional language support** across 9 languages: **Hindi (हिन्दी), Bengali (বাংলা), Odia (ଓଡ଼ିଆ), Telugu (తెలుగు), Marathi (मराठी), Gujarati (ગુજરાતી), Tamil (தமிழ்), Santhali (ᱥᱟᱱᱛᱟᱲᱤ), and English**. |
+| **Typing difficult?** | **Browser Web Speech API** for hands-free voice questioning and audio "Read Aloud" in regional accents. |
+| **Stuck on a concept?** | **EduSaarthi AI Tutor** (powered by Gemini) delivering simple, everyday analogies without jargon in your chosen regional language. |
 | **Unaware of scholarships?** | **Scholarship Finder** filtering 8+ verified national and state schemes by income, caste category, and state. |
 | **Unsure of future career?** | **AI Career Guidance** generating sequential milestone roadmaps and beginner skills. |
 | **Need human guidance?** | **Digital Mentoring** connecting students with verified rural educators and public servants. |
