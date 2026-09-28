@@ -156,6 +156,65 @@ async function runTests() {
     }
   });
 
+  await test('POST /auth/set-language sets regional language (Bengali, Odia, Telugu)', async () => {
+    const resBn = await request('/auth/set-language', {
+      method: 'POST',
+      body: { lang: 'bn' },
+      cookie: sessionCookie
+    });
+    if (resBn.statusCode !== 200) throw new Error(`Expected 200 for bn, got ${resBn.statusCode}`);
+
+    const resOr = await request('/auth/set-language', {
+      method: 'POST',
+      body: { lang: 'or' },
+      cookie: sessionCookie
+    });
+    if (resOr.statusCode !== 200) throw new Error(`Expected 200 for or, got ${resOr.statusCode}`);
+
+    const resTe = await request('/auth/set-language', {
+      method: 'POST',
+      body: { lang: 'te' },
+      cookie: sessionCookie
+    });
+    if (resTe.statusCode !== 200) throw new Error(`Expected 200 for te, got ${resTe.statusCode}`);
+  });
+
+  await test('POST /tutor/chat responds in Bengali for Bengali prompt', async () => {
+    const res = await request('/tutor/chat', {
+      method: 'POST',
+      body: { message: 'সালোকসংশ্লেষ কী? সহজ ভাষায় বুঝিয়ে দাও।', language: 'bn', educationLevel: 'Class 10' }
+    });
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    const data = JSON.parse(res.body);
+    if (!data.reply || (!data.reply.includes('সালোকসংশ্লেষ') && !data.reply.includes('উদ্ভিদ'))) {
+      throw new Error('Expected Bengali explanation in AI reply');
+    }
+  });
+
+  await test('POST /tutor/chat responds in Odia for Odia prompt', async () => {
+    const res = await request('/tutor/chat', {
+      method: 'POST',
+      body: { message: 'ଆଲୋକ ଶ୍ଳେଷଣ କ\'ଣ? ସରଳ ଭାଷାରେ ବୁଝାନ୍ତୁ।', language: 'or', educationLevel: 'Class 10' }
+    });
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    const data = JSON.parse(res.body);
+    if (!data.reply || (!data.reply.includes('ଆଲୋକ ଶ୍ଳେଷଣ') && !data.reply.includes('ଉଦ୍ଭିଦ'))) {
+      throw new Error('Expected Odia explanation in AI reply');
+    }
+  });
+
+  await test('POST /tutor/chat responds in Telugu for Telugu prompt', async () => {
+    const res = await request('/tutor/chat', {
+      method: 'POST',
+      body: { message: 'కిరణజన్య సంయోగక్రియ అంటే ఏమిటి? సులభంగా వివరించండి.', language: 'te', educationLevel: 'Class 10' }
+    });
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    const data = JSON.parse(res.body);
+    if (!data.reply || (!data.reply.includes('కిరణజన్య') && !data.reply.includes('మొక్కలు'))) {
+      throw new Error('Expected Telugu explanation in AI reply');
+    }
+  });
+
   // 7. Scholarship Finder & Filters
   await test('GET /scholarships returns 200 and lists scholarships with prototype disclaimer', async () => {
     const res = await request('/scholarships');

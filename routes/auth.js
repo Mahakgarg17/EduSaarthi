@@ -126,10 +126,13 @@ router.get('/logout', (req, res) => {
   });
 });
 
+const { SUPPORTED_LANGUAGES } = require('../utils/i18n');
+
 // Set Language Preference API
 router.post('/set-language', (req, res) => {
   const { lang } = req.body;
-  if (lang === 'en' || lang === 'hi') {
+  const isSupported = SUPPORTED_LANGUAGES.some(l => l.code === lang);
+  if (isSupported) {
     req.session.lang = lang;
     if (req.session.user) {
       req.session.user.preferred_language = lang;

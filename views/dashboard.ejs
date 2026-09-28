@@ -41,9 +41,9 @@
           📶
         </div>
         <div>
-          <div class="metric-label"><%= (lang === 'hi') ? 'नेटवर्क स्थिति' : 'Connectivity' %></div>
+          <div class="metric-label"><%= t('connectivity') %></div>
           <div class="metric-value">
-            <%= (typeof lowData !== 'undefined' && lowData) ? 'Low Bandwidth' : 'Low-data mode' %>
+            <%= (typeof lowData !== 'undefined' && lowData) ? t('lowDataOn') : t('lowDataOff') %>
           </div>
         </div>
       </div>
@@ -54,9 +54,9 @@
           🌐
         </div>
         <div>
-          <div class="metric-label"><%= (lang === 'hi') ? 'सक्रिय भाषा' : 'Language' %></div>
+          <div class="metric-label"><%= t('language') %></div>
           <div class="metric-value">
-            <%= (lang === 'hi') ? 'हिन्दी (Hindi)' : 'English' %>
+            <%= typeof currentLanguage !== 'undefined' ? currentLanguage.label + ' (' + currentLanguage.name + ')' : 'हिन्दी (Hindi)' %>
           </div>
         </div>
       </div>
@@ -67,7 +67,7 @@
           📚
         </div>
         <div>
-          <div class="metric-label"><%= (lang === 'hi') ? 'कुल प्रगति' : 'Learning Progress' %></div>
+          <div class="metric-label"><%= t('learningProgress') %></div>
           <div class="metric-value"><%= overallProgressPercent %>%</div>
         </div>
       </div>
@@ -79,7 +79,7 @@
         </div>
         <div>
           <div class="metric-label"><%= (lang === 'hi') ? 'योग्य छात्रवृत्तियां' : 'Opportunities' %></div>
-          <div class="metric-value">6 <%= (lang === 'hi') ? 'छात्रवृत्तियां उपलब्ध' : 'scholarships found' %></div>
+          <div class="metric-value">6 <%= t('opportunitiesFound') %></div>
         </div>
       </div>
     </div>
@@ -89,7 +89,7 @@
   <section style="margin-bottom: 3rem;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
       <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);">
-        <%= (lang === 'hi') ? 'पढ़ाई जारी रखें (Continue Learning)' : 'Continue Learning' %>
+        <%= t('continueLearning') %>
       </h2>
       <a href="/learn" style="font-weight: 600; font-size: 0.9rem; color: var(--primary);">
         <%= (lang === 'hi') ? 'सभी 5 विषय देखें →' : 'View all 5 courses →' %>
@@ -186,38 +186,38 @@
   <!-- Section: Quick Actions (5 Cards) -->
   <section style="margin-bottom: 3rem;">
     <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.25rem;">
-      <%= (lang === 'hi') ? 'त्वरित कार्य (Quick Actions)' : 'Quick Actions' %>
+      <%= t('quickActions') %>
     </h2>
 
     <div class="quick-actions-grid">
       <!-- 1. Ask AI Tutor -->
       <a href="/tutor" class="quick-action-card">
         <div class="quick-action-icon">🤖</div>
-        <div class="quick-action-title"><%= (lang === 'hi') ? 'एआई ट्यूटर से पूछें' : 'Ask AI Tutor' %></div>
+        <div class="quick-action-title"><%= t('askAiTutor') %></div>
       </a>
 
       <!-- 2. Voice Question -->
       <a href="/tutor?mode=voice" class="quick-action-card">
         <div class="quick-action-icon">🎤</div>
-        <div class="quick-action-title"><%= (lang === 'hi') ? 'आवाज़ से प्रश्न (Voice)' : 'Voice Question' %></div>
+        <div class="quick-action-title"><%= t('voiceQuestion') %></div>
       </a>
 
       <!-- 3. Find Scholarships -->
       <a href="/scholarships" class="quick-action-card">
         <div class="quick-action-icon">🎓</div>
-        <div class="quick-action-title"><%= (lang === 'hi') ? 'छात्रवृत्ति खोजें' : 'Find Scholarships' %></div>
+        <div class="quick-action-title"><%= t('findScholarships') %></div>
       </a>
 
       <!-- 4. Career Guidance -->
       <a href="/career" class="quick-action-card">
         <div class="quick-action-icon">🧭</div>
-        <div class="quick-action-title"><%= (lang === 'hi') ? 'करियर मार्गदर्शन' : 'Career Guidance' %></div>
+        <div class="quick-action-title"><%= t('careerGuidance') %></div>
       </a>
 
       <!-- 5. Find Mentor -->
       <a href="/mentors" class="quick-action-card">
         <div class="quick-action-icon">👨‍🏫</div>
-        <div class="quick-action-title"><%= (lang === 'hi') ? 'मेंटर खोजें' : 'Find Mentor' %></div>
+        <div class="quick-action-title"><%= t('findMentor') %></div>
       </a>
     </div>
   </section>
@@ -225,7 +225,7 @@
   <!-- Section: Recommended For You -->
   <section style="margin-bottom: 3rem;">
     <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.25rem;">
-      <%= (lang === 'hi') ? 'आपके लिए अनुशंसित पाठ (Recommended For You)' : 'Recommended For You' %>
+      <%= t('recommendedForYou') %>
     </h2>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
@@ -265,7 +265,7 @@
   <section>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
       <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);">
-        <%= (lang === 'hi') ? 'आपके अवसर (Your Opportunities)' : 'Your Opportunities' %>
+        <%= t('yourOpportunities') %>
       </h2>
       <a href="/scholarships" style="font-weight: 600; font-size: 0.9rem; color: var(--primary);">
         <%= (lang === 'hi') ? 'सभी छात्रवृत्तियां देखें →' : 'View all scholarships →' %>

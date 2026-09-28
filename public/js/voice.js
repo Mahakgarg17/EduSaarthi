@@ -1,11 +1,29 @@
 /**
  * EduSaarthi - Web Speech API Voice Controller
  * Implements Voice-to-Text (SpeechRecognition) & Text-to-Speech (speechSynthesis)
+ * Supports multilingual regional Indian languages: Hindi, Bengali, Odia, Telugu, Marathi, Gujarati, Tamil, English.
  */
+
+const SPEECH_LANG_MAP = {
+  hi: 'hi-IN',
+  en: 'en-IN',
+  bn: 'bn-IN',
+  or: 'or-IN',
+  te: 'te-IN',
+  mr: 'mr-IN',
+  gu: 'gu-IN',
+  ta: 'ta-IN',
+  sat: 'hi-IN'
+};
 
 window.EduVoice = {
   recognition: null,
   isListening: false,
+
+  getSpeechLangCode(lang) {
+    const docLang = lang || document.documentElement.lang || 'hi';
+    return SPEECH_LANG_MAP[docLang] || 'hi-IN';
+  },
 
   // Initialize Speech Recognition
   initRecognition(onResultCallback, onEndCallback) {
@@ -17,7 +35,7 @@ window.EduVoice = {
     const rec = new SpeechRecognition();
     rec.continuous = false;
     rec.interimResults = true;
-    rec.lang = (document.documentElement.lang === 'hi') ? 'hi-IN' : 'en-IN';
+    rec.lang = this.getSpeechLangCode();
 
     rec.onresult = (event) => {
       let interimTranscript = '';
@@ -79,7 +97,7 @@ window.EduVoice = {
       this.isListening = true;
       if (onStatusChange) onStatusChange(true);
       if (window.showToast) {
-        window.showToast('Listening... Speak your question now.', 'info');
+        window.showToast(`Listening in ${this.getSpeechLangCode()}... Speak now.`, 'info');
       }
       return true;
     } catch (err) {
@@ -109,22 +127,23 @@ window.EduVoice = {
       .replace(/\[(.*?)\]/g, '$1')
       .trim();
 
+    const targetCode = this.getSpeechLangCode(lang);
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = (lang === 'hi') ? 'hi-IN' : 'en-IN';
-    utterance.rate = 0.95; // Slightly slower, clear pace for students
+    utterance.lang = targetCode;
+    utterance.rate = 0.92; // Clear, comfortable pace for students
     utterance.pitch = 1.0;
 
     // Pick best available matching voice
     const voices = window.speechSynthesis.getVoices();
-    const targetLangCode = (lang === 'hi') ? 'hi' : 'en';
-    const matchedVoice = voices.find(v => v.lang.startsWith(targetLangCode));
+    const langPrefix = targetCode.split('-')[0];
+    const matchedVoice = voices.find(v => v.lang.startsWith(targetCode) || v.lang.startsWith(langPrefix));
     if (matchedVoice) {
       utterance.voice = matchedVoice;
     }
 
     window.speechSynthesis.speak(utterance);
     if (window.showToast) {
-      window.showToast('Reading response aloud 🔊', 'info');
+      window.showToast(`Reading response aloud in ${targetCode} 🔊`, 'info');
     }
   },
 

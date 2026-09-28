@@ -136,7 +136,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateNetworkStatus();
 
-  // 4. Language Selector Handler
+  // 4. Multilingual Language Selector Handler
+  const langSelect = document.getElementById('lang-select');
+  if (langSelect) {
+    langSelect.addEventListener('change', async () => {
+      const selectedLang = langSelect.value;
+      try {
+        const res = await fetch('/auth/set-language', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lang: selectedLang })
+        });
+        if (res.ok) {
+          const selectedText = langSelect.options[langSelect.selectedIndex].text;
+          showToast(`Language set to ${selectedText}`, 'success');
+          setTimeout(() => window.location.reload(), 250);
+        }
+      } catch (err) {
+        console.error('Failed to change language:', err);
+      }
+    });
+  }
+
   const langToggleBtn = document.getElementById('lang-toggle-btn');
   if (langToggleBtn) {
     langToggleBtn.addEventListener('click', async () => {
@@ -151,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (res.ok) {
           showToast(newLang === 'hi' ? 'भाषा बदलकर हिन्दी कर दी गई है।' : 'Language changed to English.', 'success');
-          setTimeout(() => window.location.reload(), 300);
+          setTimeout(() => window.location.reload(), 250);
         }
       } catch (err) {
         console.error('Failed to change language:', err);

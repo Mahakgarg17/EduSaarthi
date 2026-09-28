@@ -12,13 +12,13 @@
           <span class="badge badge-success" style="font-size: 0.7rem; margin-left: 0.5rem;">Adaptive 2.0</span>
         </h3>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">
-          <%= (lang === 'hi') ? 'प्रश्न पूछें। अवधारणाओं को समझें। अपनी गति से सीखें।' : 'Ask questions. Understand concepts. Learn at your pace.' %>
+          <%= t('tagline') %>
         </p>
       </div>
 
       <div style="display: flex; align-items: center; gap: 0.5rem;">
         <span class="badge badge-slate" id="chat-lang-indicator">
-          <%= (lang === 'hi') ? 'हिन्दी मोड' : 'English Mode' %>
+          🌐 <%= typeof currentLanguage !== 'undefined' ? currentLanguage.label : 'हिन्दी' %>
         </span>
       </div>
     </div>
@@ -30,12 +30,24 @@
         <div class="msg-header">
           <strong>EduSaarthi AI</strong>
           <button type="button" class="read-aloud-btn" onclick="readBubbleText(this)">
-            🔊 <%= (lang === 'hi') ? 'सुनाएँ' : 'Read Aloud' %>
+            🔊 <%= t('readAloud') %>
           </button>
         </div>
         <div class="bubble-text">
           <% if (lang === 'hi') { %>
             नमस्ते! 👋 मैं आपका एडू-सारथी एआई ट्यूटर हूँ। विज्ञान, गणित, अंग्रेज़ी या किसी भी विषय में जो बात समझ न आई हो, बेझिझक पूछें। आप बोलकर (माइक) या लिखकर सवाल कर सकते हैं।
+          <% } else if (lang === 'bn') { %>
+            নমস্কার! 👋 আমি আপনার এডু-সারথী এআই শিক্ষক। বিজ্ঞান, অঙ্ক, ইংরেজি বা যেকোনো বিষয়ে আপনার প্রশ্ন নিঃসংকোচে জিজ্ঞাসা করুন।
+          <% } else if (lang === 'or') { %>
+            ନମସ୍କାର! 👋 ମୁଁ ଆପଣଙ୍କର ଏଡୁ-ସାରଥି ଏଆଇ ଶିକ୍ଷକ। ବିଜ୍ଞାନ, ଗଣିତ, ଇଂରାଜୀ କିମ୍ବା ଯେକୌଣସି ବିଷୟରେ ଆପଣଙ୍କର ସନ୍ଦେହ ପଚାରନ୍ତୁ।
+          <% } else if (lang === 'te') { %>
+            నమస్కారం! 👋 నేను మీ ఎడ్యుసారథి AI ట్యూటర్‌ను. సైన్స్, మ్యాథ్స్ లేదా ఏదైనా సబ్జెక్టులో మీ సందేహాలను అడగండి.
+          <% } else if (lang === 'mr') { %>
+            नमस्कार! 👋 मी तुमचा एड्यू-सारथी एआय ट्यूटर आहे. विज्ञान, गणित किंवा इतर कोणत्याही विषयातील शंका बिनधास्त विचारा.
+          <% } else if (lang === 'gu') { %>
+            નમસ્તે! 👋 હું તમારો એડ્યુ-સારથી AI શિક્ષક છું. વિજ્ઞાન, ગણિત અથવા કોઈપણ વિષયમાં પ્રશ્ન પૂછો.
+          <% } else if (lang === 'ta') { %>
+            வணக்கம்! 👋 நான் உங்கள் எடு-சாரதி AI ஆசிரியர். அறிவியல், கணிதம் அல்லது எந்தப் பாடத்திலும் உங்கள் சந்தேகங்களைக் கேளுங்கள்.
           <% } else { %>
             Hello! 👋 I am your EduSaarthi AI Tutor. Ask me any concept in Science, Math, English, or Social Studies. You can type or use the microphone button to ask questions in your own words.
           <% } %>
@@ -46,21 +58,70 @@
     <!-- Suggested Question Chips -->
     <div class="prompt-chips-wrap">
       <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); align-self: center; margin-right: 0.25rem;">
-        <%= (lang === 'hi') ? 'सुझाए गए प्रश्न:' : 'Suggested:' %>
+        <%= t('suggested') %>
       </span>
 
-      <button type="button" class="chip-btn" data-query="<%= (lang === 'hi') ? 'प्रकाश संश्लेषण क्या है? इसे आसान भाषा में समझाओ।' : 'Explain photosynthesis simply' %>">
-        🌿 <%= (lang === 'hi') ? 'प्रकाश संश्लेषण क्या है?' : 'Explain photosynthesis simply' %>
-      </button>
-
-      <button type="button" class="chip-btn" data-query="<%= (lang === 'hi') ? 'आकाश का रंग नीला क्यों दिखाई देता है?' : 'Why is the sky blue?' %>">
-        🌤️ <%= (lang === 'hi') ? 'आकाश नीला क्यों है?' : 'Why is the sky blue?' %>
-      </button>
-
-      <button type="button" class="chip-btn" data-query="<%= (lang === 'hi') ? 'न्यूटन का तीसरा गति नियम क्या है?' : 'Explain Newton\'s third law' %>">
-        🍎 <%= (lang === 'hi') ? 'न्यूटन का तीसरा नियम' : 'Newton\'s third law' %>
-      </button>
-
+      <% if (lang === 'bn') { %>
+        <button type="button" class="chip-btn" data-query="সালোকসংশ্লেষ কী? সহজ ভাষায় বুঝিয়ে দাও।">
+          🌿 সালোকসংশ্লেষ কী?
+        </button>
+        <button type="button" class="chip-btn" data-query="আকাশ নীল দেখায় কেন?">
+          🌤️ আকাশ নীল কেন?
+        </button>
+        <button type="button" class="chip-btn" data-query="নিউটনের তৃতীয় গতিসূত্র কী?">
+          🍎 নিউটনের তৃতীয় সূত্র
+        </button>
+      <% } else if (lang === 'or') { %>
+        <button type="button" class="chip-btn" data-query="ଆଲୋକ ଶ୍ଳେଷଣ କ'ଣ? ସରଳ ଭାଷାରେ ବୁଝାନ୍ତୁ।">
+          🌿 ଆଲୋକ ଶ୍ଳେଷଣ କ'ଣ?
+        </button>
+        <button type="button" class="chip-btn" data-query="ଆକାଶ ନୀଳ କାହିଁକି ଦେଖାଯାଏ?">
+          🌤️ ଆକାଶ ନୀଳ କାହିଁକି?
+        </button>
+        <button type="button" class="chip-btn" data-query="ନ୍ୟୁଟନଙ୍କ ତୃତୀୟ ଗତି ନିୟମ କ'ଣ?">
+          🍎 ନ୍ୟୁଟନଙ୍କ ତୃତୀୟ ନିୟମ
+        </button>
+      <% } else if (lang === 'te') { %>
+        <button type="button" class="chip-btn" data-query="కిరణజన్య సంయోగక్రియ అంటే ఏమిటి? సులభంగా వివరించండి.">
+          🌿 కిరణజన్య సంయోగక్రియ?
+        </button>
+        <button type="button" class="chip-btn" data-query="ఆకాశం నీలంగా ఎందుకు కనిపిస్తుంది?">
+          🌤️ ఆకాశం నీలం ఎందుకు?
+        </button>
+        <button type="button" class="chip-btn" data-query="న్యూటన్ మూడవ చలన సూత్రం ఏమిటి?">
+          🍎 న్యూటన్ మూడవ సూత్రం
+        </button>
+      <% } else if (lang === 'mr') { %>
+        <button type="button" class="chip-btn" data-query="प्रकाशसंश्लेषण म्हणजे काय? सोप्या भाषेत समजावून सांगा.">
+          🌿 प्रकाशसंश्लेषण म्हणजे काय?
+        </button>
+        <button type="button" class="chip-btn" data-query="आकाश निळे का दिसते?">
+          🌤️ आकाश निळे का दिसते?
+        </button>
+        <button type="button" class="chip-btn" data-query="न्यूटनचा तिसरा गतीचा नियम काय आहे?">
+          🍎 न्यूटनचा तिसरा नियम
+        </button>
+      <% } else if (lang === 'hi') { %>
+        <button type="button" class="chip-btn" data-query="प्रकाश संश्लेषण क्या है? इसे आसान भाषा में समझाओ।">
+          🌿 प्रकाश संश्लेषण क्या है?
+        </button>
+        <button type="button" class="chip-btn" data-query="आकाश का रंग नीला क्यों दिखाई देता है?">
+          🌤️ आकाश नीला क्यों है?
+        </button>
+        <button type="button" class="chip-btn" data-query="न्यूटन का तीसरा गति नियम क्या है?">
+          🍎 न्यूटन का तीसरा नियम
+        </button>
+      <% } else { %>
+        <button type="button" class="chip-btn" data-query="Explain photosynthesis simply">
+          🌿 Explain photosynthesis simply
+        </button>
+        <button type="button" class="chip-btn" data-query="Why is the sky blue?">
+          🌤️ Why is the sky blue?
+        </button>
+        <button type="button" class="chip-btn" data-query="Explain Newton's third law">
+          🍎 Newton's third law
+        </button>
+      <% } %>
       <button type="button" class="chip-btn" data-query="<%= (lang === 'hi') ? 'गणित के कठिन प्रश्न हल करने का तरीका समझाओ' : 'Help me solve this math problem' %>">
         📐 <%= (lang === 'hi') ? 'गणित का सवाल कैसे हल करें?' : 'Help me solve math problem' %>
       </button>
@@ -75,13 +136,13 @@
       <input 
         type="text" 
         id="chat-input" 
-        placeholder="<%= (lang === 'hi') ? 'अपना सवाल यहाँ लिखें या माइक से बोलें...' : 'Ask your question...' %>" 
+        placeholder="<%= t('askQuestionPlaceholder') %>" 
         required 
         autocomplete="off"
       >
 
       <button type="submit" id="chat-send-btn" class="btn btn-primary" style="padding: 0.75rem 1.4rem;">
-        <span><%= (lang === 'hi') ? 'भेजें' : 'Send' %></span>
+        <span><%= t('send') %></span>
         <span>➤</span>
       </button>
     </form>

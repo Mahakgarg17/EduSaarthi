@@ -9,28 +9,26 @@
         <div class="hero-badge-wrap">
           <span class="hero-pill">
             <span>✨</span>
-            <span><%= (lang === 'hi') ? 'ग्रामीण एवं जनजातीय विद्यार्थियों हेतु समर्पित' : 'Dedicated to Rural & Tribal Learners' %></span>
+            <span><%= t('heroTag') %></span>
           </span>
         </div>
 
         <h1 id="hero-heading" class="hero-title">
-          <%= (lang === 'hi') ? 'बाधाओं से मुक्त शिक्षा' : 'Learning Without Barriers' %>
+          <%= t('heroTitle') %>
         </h1>
 
         <p class="hero-subtitle">
-          <%= (lang === 'hi') 
-            ? 'एक एआई-संचालित, बहुभाषी शिक्षा साथी जो उन विद्यार्थियों के लिए बनाया गया है जहां न तो तेज इंटरनेट है और न ही निजी ट्यूशन का सहारा।' 
-            : 'An AI-powered, multilingual learning companion designed for students beyond the reach of reliable internet and traditional educational support.' %>
+          <%= t('heroSubtitle') %>
         </p>
 
         <div class="hero-actions">
           <a href="<%= user ? '/dashboard' : '/auth/login' %>" class="btn btn-primary btn-lg">
             <span>🚀</span>
-            <span><%= (lang === 'hi') ? 'पढ़ाई शुरू करें' : 'Start Learning' %></span>
+            <span><%= t('startLearning') %></span>
           </a>
           <a href="#features" class="btn btn-secondary btn-lg">
             <span>🔍</span>
-            <span><%= (lang === 'hi') ? 'सुविधाएं देखें' : 'Explore Features' %></span>
+            <span><%= t('exploreFeatures') %></span>
           </a>
         </div>
       </div>

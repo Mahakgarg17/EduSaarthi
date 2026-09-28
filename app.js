@@ -31,11 +31,17 @@ app.use(
   })
 );
 
+const i18n = require('./utils/i18n');
+
 // Global view variables middleware
 app.use((req, res, next) => {
+  const currentLangCode = req.session.lang || 'hi';
   res.locals.user = req.session.user || null;
-  res.locals.lang = req.session.lang || 'hi';
+  res.locals.lang = currentLangCode;
   res.locals.lowData = req.session.lowData || false;
+  res.locals.supportedLanguages = i18n.SUPPORTED_LANGUAGES;
+  res.locals.t = i18n.getTranslator(currentLangCode);
+  res.locals.currentLanguage = i18n.SUPPORTED_LANGUAGES.find(l => l.code === currentLangCode) || i18n.SUPPORTED_LANGUAGES[0];
   next();
 });
 
