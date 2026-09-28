@@ -1,0 +1,197 @@
+<%- include('partials/header', { pageTitle: (lang === 'hi') ? 'करियर मार्गदर्शन' : 'Career Guidance' }) %>
+<%- include('partials/navbar', { activeTab: 'career' }) %>
+
+<main class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <!-- Headline -->
+  <div style="text-align: center; max-width: 720px; margin: 0 auto 2.5rem;">
+    <span class="badge badge-purple" style="margin-bottom: 0.5rem; font-size: 0.8rem;">
+      🧭 <%= (lang === 'hi') ? 'भविष्य की दिशा' : 'Future Pathways' %>
+    </span>
+    <h1 style="font-size: 2.25rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">
+      <%= (lang === 'hi') ? 'अपना भविष्य और करियर मार्ग चुनें' : 'Discover Your Career Path' %>
+    </h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      <%= (lang === 'hi') 
+        ? 'अपनी रुचियों, कक्षा और कौशल के आधार पर जानें कि आप आगे क्या पढ़ाई कर सकते हैं और कैसे आगे बढ़ सकते हैं।' 
+        : 'Explore customized step-by-step roadmaps from school stages to meaningful professional livelihoods.' %>
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: <%= careerAdvice ? '1fr 1.25fr' : '1fr' %>; gap: 2.5rem; max-width: <%= careerAdvice ? '100%' : '650px' %>; margin: 0 auto;">
+    <!-- Career Input Form -->
+    <div class="card" style="padding: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main);">
+          <%= (lang === 'hi') ? 'आपकी प्रोफ़ाइल एवं रुचियां' : 'Your Profile & Interests' %>
+        </h3>
+        <button type="button" id="fill-demo-career" class="btn btn-sm btn-accent" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">
+          ⚡ Demo Tech Profile
+        </button>
+      </div>
+
+      <form id="career-form" action="/career/advice" method="POST">
+        <!-- Education Level -->
+        <div class="form-group">
+          <label for="education_level" class="form-label"><%= (lang === 'hi') ? 'वर्तमान कक्षा / स्तर' : 'Current Education Level' %></label>
+          <select id="education_level" name="education_level" class="form-select">
+            <option value="Class 10" selected>Class 10</option>
+            <option value="Class 9">Class 9</option>
+            <option value="Class 11">Class 11</option>
+            <option value="Class 12">Class 12</option>
+            <option value="Polytechnic">Polytechnic / ITI</option>
+            <option value="College">College / Degree</option>
+          </select>
+        </div>
+
+        <!-- Subjects -->
+        <div class="form-group">
+          <label for="subjects" class="form-label"><%= (lang === 'hi') ? 'पसंदीदा विषय' : 'Favorite Subjects' %></label>
+          <input type="text" id="subjects" name="subjects" class="form-control" placeholder="उदा. Science, Mathematics, English" value="<%= (formData && formData.subjects) ? formData.subjects : 'Science, Mathematics' %>">
+        </div>
+
+        <!-- Interests -->
+        <div class="form-group">
+          <label for="interest" class="form-label"><%= (lang === 'hi') ? 'मुख्य रुचि का क्षेत्र' : 'Primary Field of Interest' %></label>
+          <select id="interest" name="interest" class="form-select">
+            <option value="Technology" selected>💻 Technology & Computers (सॉफ्टवेयर एवं तकनीक)</option>
+            <option value="Healthcare">🏥 Healthcare & Medicine (चिकित्सा एवं स्वास्थ्य)</option>
+            <option value="Government Services">🏛️ Government Services & Administration (प्रशासनिक सेवाएं)</option>
+            <option value="Environment">🌱 Environment & Agriculture (कृषि एवं पर्यावरण)</option>
+            <option value="Teaching">📚 Teaching & Education (शिक्षण एवं अनुसंधान)</option>
+            <option value="Design">🎨 Design & Creative Arts (डिजाइन एवं कला)</option>
+            <option value="Business">💼 Rural Business & Commerce (व्यापार एवं उद्योग)</option>
+            <option value="Science">🔬 Pure Science & Research (वैज्ञानिक अनुसंधान)</option>
+          </select>
+        </div>
+
+        <!-- Existing Skills -->
+        <div class="form-group">
+          <label for="skills" class="form-label"><%= (lang === 'hi') ? 'कौशल या ताकत' : 'Skills & Strengths' %></label>
+          <input type="text" id="skills" name="skills" class="form-control" placeholder="उदा. Problem solving, curiosity, mobile usage" value="<%= (formData && formData.skills) ? formData.skills : 'Problem solving, curiosity' %>">
+        </div>
+
+        <!-- Preferred Work Type -->
+        <div class="form-group">
+          <label for="work_type" class="form-label"><%= (lang === 'hi') ? 'पसंदीदा कार्यशैली' : 'Preferred Work Style' %></label>
+          <select id="work_type" name="work_type" class="form-select">
+            <option value="Hands-on practical and problem solving">Hands-on practical & problem solving</option>
+            <option value="Outdoor field work and community interaction">Field work & community leadership</option>
+            <option value="Digital computer and creative workspace">Digital / Computer work</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem; margin-top: 0.5rem;">
+          <span>🧭</span>
+          <span><%= (lang === 'hi') ? 'रोडमैप तैयार करें (Generate Roadmap)' : 'Generate Career Roadmap' %></span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Career Roadmap Result (when available) -->
+    <% if (careerAdvice) { %>
+      <div class="card" style="border-top: 5px solid #2563EB; padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <span class="badge badge-primary">Recommended Career Pathway</span>
+          <% if (careerAdvice.isLive) { %>
+            <span class="badge badge-success">✨ Live Gemini Analysis</span>
+          <% } else { %>
+            <span class="badge badge-slate">Structured Guidance</span>
+          <% } %>
+        </div>
+
+        <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem;">
+          <%= (lang === 'hi' && careerAdvice.title_hi) ? careerAdvice.title_hi : careerAdvice.title %>
+        </h2>
+
+        <!-- Why It May Fit -->
+        <div style="background: #EFF6FF; border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.75rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; color: #1E40AF; margin-bottom: 0.5rem;">
+            <%= (lang === 'hi') ? 'यह करियर आपके लिए क्यों उपयुक्त है?' : 'Why It May Fit You:' %>
+          </h4>
+          <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem; color: #1E3A8A;">
+            <% 
+              const fits = (lang === 'hi' && careerAdvice.whyFit_hi) ? careerAdvice.whyFit_hi : (careerAdvice.whyFit || []);
+              fits.forEach(fit => { 
+            %>
+              <li><%= fit %></li>
+            <% }); %>
+          </ul>
+        </div>
+
+        <!-- Sequential Step-by-Step Roadmap -->
+        <div style="margin-bottom: 1.75rem;">
+          <h4 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-bottom: 1rem;">
+            <%= (lang === 'hi') ? 'चरणबद्ध प्रगति का मार्ग (Roadmap):' : 'Step-by-Step Milestone Roadmap:' %>
+          </h4>
+
+          <% if (careerAdvice.roadmap && careerAdvice.roadmap.length > 0) { %>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; position: relative;">
+              <% careerAdvice.roadmap.forEach((step, idx) => { %>
+                <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                  <div style="width: 2rem; height: 2rem; border-radius: 50%; background: #2563EB; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;">
+                    <%= step.step || (idx + 1) %>
+                  </div>
+                  <div style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem 1rem; flex: 1;">
+                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.2rem;">
+                      <%= step.title %>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">
+                      <%= step.desc %>
+                    </div>
+                  </div>
+                </div>
+                <% if (idx < careerAdvice.roadmap.length - 1) { %>
+                  <div style="width: 2px; height: 12px; background: #CBD5E1; margin-left: 1rem;"></div>
+                <% } %>
+              <% }); %>
+            </div>
+          <% } else if (careerAdvice.rawAiText) { %>
+            <div style="background: var(--surface-alt); padding: 1.25rem; border-radius: var(--radius-md); font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap;">
+              <%= careerAdvice.rawAiText %>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- Skills to Start Learning -->
+        <% if (careerAdvice.skills && careerAdvice.skills.length > 0) { %>
+          <div style="margin-bottom: 1.5rem;">
+            <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">
+              <%= (lang === 'hi') ? 'अभी से सीखने योग्य बुनियादी कौशल:' : 'Skills to Start Learning Today:' %>
+            </h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+              <% careerAdvice.skills.forEach(skill => { %>
+                <span class="badge badge-success" style="font-size: 0.825rem; padding: 0.35rem 0.7rem;">
+                  ⭐ <%= skill %>
+                </span>
+              <% }); %>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Important Guidance Disclaimer -->
+        <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: var(--radius-sm); padding: 0.75rem; font-size: 0.8rem; color: #92400E;">
+          <strong>Guidance Note:</strong> Recommendations are designed to empower and inspire self-directed exploration. They represent viable pathways rather than guaranteed outcomes.
+        </div>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<script>
+  // 1-Click Demo Fill for judges
+  const demoCareerBtn = document.getElementById('fill-demo-career');
+  if (demoCareerBtn) {
+    demoCareerBtn.addEventListener('click', () => {
+      document.getElementById('education_level').value = 'Class 10';
+      document.getElementById('subjects').value = 'Mathematics, Science, English';
+      document.getElementById('interest').value = 'Technology';
+      document.getElementById('skills').value = 'Logical thinking, problem solving, curious about how apps work';
+      window.showToast('Demo Tech Student Profile loaded', 'info');
+      setTimeout(() => {
+        document.getElementById('career-form').submit();
+      }, 400);
+    });
+  }
+</script>
+
+<%- include('partials/footer') %>

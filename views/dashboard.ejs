@@ -1,0 +1,307 @@
+<%- include('partials/header', { pageTitle: (lang === 'hi') ? 'विद्यार्थी डैशबोर्ड' : 'Student Dashboard' }) %>
+<%- include('partials/navbar', { activeTab: 'dashboard' }) %>
+
+<main class="container" style="padding-top: 1.5rem; padding-bottom: 3.5rem;">
+  <!-- Welcome Greeting Header -->
+  <section class="dashboard-header">
+    <div class="user-greeting-row">
+      <div>
+        <h1 class="greeting-title">
+          <% 
+            const hour = new Date().getHours();
+            let greetingEn = 'Good evening';
+            let greetingHi = 'शुभ संध्या';
+            if (hour < 12) { greetingEn = 'Good morning'; greetingHi = 'शुभ प्रभात'; }
+            else if (hour < 17) { greetingEn = 'Good afternoon'; greetingHi = 'शुभ दोपहर'; }
+          %>
+          <%= (lang === 'hi') ? `${greetingHi}, ${user.name ? user.name.split(' ')[0] : 'राहुल'} 👋` : `${greetingEn}, ${user.name ? user.name.split(' ')[0] : 'Rahul'} 👋` %>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem; margin-top: 0.25rem;">
+          <%= (lang === 'hi') ? 'अपनी शिक्षा की यात्रा को आगे बढ़ाएं। बिना इंटरनेट भी आपके सहेजे गए पाठ उपलब्ध हैं।' : 'Continue your learning journey. Your offline lessons remain available anytime.' %>
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="/tutor" class="btn btn-primary btn-sm">
+          <span>🤖</span>
+          <span><%= (lang === 'hi') ? 'एआई ट्यूटर से पूछें' : 'Ask AI Tutor' %></span>
+        </a>
+        <a href="/learn" class="btn btn-secondary btn-sm">
+          <span>📚</span>
+          <span><%= (lang === 'hi') ? 'सभी विषय' : 'Browse Courses' %></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 4 Status Metric Cards -->
+    <div class="metrics-grid">
+      <!-- 1. Connectivity -->
+      <div class="metric-card">
+        <div class="metric-icon-wrap" style="background: #EFF6FF; color: #2563EB;">
+          📶
+        </div>
+        <div>
+          <div class="metric-label"><%= (lang === 'hi') ? 'नेटवर्क स्थिति' : 'Connectivity' %></div>
+          <div class="metric-value">
+            <%= (typeof lowData !== 'undefined' && lowData) ? 'Low Bandwidth' : 'Low-data mode' %>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Language -->
+      <div class="metric-card">
+        <div class="metric-icon-wrap" style="background: #FEF3C7; color: #D97706;">
+          🌐
+        </div>
+        <div>
+          <div class="metric-label"><%= (lang === 'hi') ? 'सक्रिय भाषा' : 'Language' %></div>
+          <div class="metric-value">
+            <%= (lang === 'hi') ? 'हिन्दी (Hindi)' : 'English' %>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Learning Progress -->
+      <div class="metric-card">
+        <div class="metric-icon-wrap" style="background: #ECFDF5; color: #059669;">
+          📚
+        </div>
+        <div>
+          <div class="metric-label"><%= (lang === 'hi') ? 'कुल प्रगति' : 'Learning Progress' %></div>
+          <div class="metric-value"><%= overallProgressPercent %>%</div>
+        </div>
+      </div>
+
+      <!-- 4. Opportunities -->
+      <div class="metric-card">
+        <div class="metric-icon-wrap" style="background: #F3E8FF; color: #7C3AED;">
+          🎓
+        </div>
+        <div>
+          <div class="metric-label"><%= (lang === 'hi') ? 'योग्य छात्रवृत्तियां' : 'Opportunities' %></div>
+          <div class="metric-value">6 <%= (lang === 'hi') ? 'छात्रवृत्तियां उपलब्ध' : 'scholarships found' %></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: Continue Learning (Course Cards with progress) -->
+  <section style="margin-bottom: 3rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);">
+        <%= (lang === 'hi') ? 'पढ़ाई जारी रखें (Continue Learning)' : 'Continue Learning' %>
+      </h2>
+      <a href="/learn" style="font-weight: 600; font-size: 0.9rem; color: var(--primary);">
+        <%= (lang === 'hi') ? 'सभी 5 विषय देखें →' : 'View all 5 courses →' %>
+      </a>
+    </div>
+
+    <div class="courses-grid">
+      <!-- Course 1: Mathematics (Progress 72%) -->
+      <div class="course-card">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+            <span class="badge badge-success">Class 10</span>
+            <span style="font-size: 1.5rem;">📐</span>
+          </div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.35rem;">
+            <%= (lang === 'hi') ? 'कक्षा 10 गणित' : 'Mathematics' %>
+          </h3>
+          <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
+            <%= (lang === 'hi') ? 'संख्याएं, बहुपद, द्विघात समीकरण एवं समानांतर श्रेढ़ी' : 'Real Numbers, Polynomials & Arithmetic Progressions' %>
+          </p>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">
+            <span><%= (lang === 'hi') ? 'प्रगति' : 'Progress' %></span>
+            <span style="color: #16A34A;">72%</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: 72%; background-color: #16A34A;"></div>
+          </div>
+          <a href="/learn/class-10-mathematics" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 1rem;">
+            <%= (lang === 'hi') ? 'पढ़ना जारी रखें' : 'Continue' %>
+          </a>
+        </div>
+      </div>
+
+      <!-- Course 2: Science (Progress 48%) -->
+      <div class="course-card">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+            <span class="badge badge-primary">Class 10</span>
+            <span style="font-size: 1.5rem;">🔬</span>
+          </div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.35rem;">
+            <%= (lang === 'hi') ? 'कक्षा 10 विज्ञान' : 'Science' %>
+          </h3>
+          <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
+            <%= (lang === 'hi') ? 'रासायनिक अभिक्रियाएँ, अम्ल-क्षारक, जैव प्रक्रम, प्रकाश, विद्युत' : 'Chemical Reactions, Acids & Bases, Life Processes, Light, Electricity' %>
+          </p>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">
+            <span><%= (lang === 'hi') ? 'प्रगति' : 'Progress' %></span>
+            <span style="color: #0284C7;">48%</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: 48%; background-color: #0284C7;"></div>
+          </div>
+          <a href="/learn/class-10-science" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 1rem;">
+            <%= (lang === 'hi') ? 'पढ़ना जारी रखें' : 'Continue' %>
+          </a>
+        </div>
+      </div>
+
+      <!-- Course 3: English (Progress 64%) -->
+      <div class="course-card">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+            <span class="badge badge-purple">Class 10</span>
+            <span style="font-size: 1.5rem;">📖</span>
+          </div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.35rem;">
+            <%= (lang === 'hi') ? 'कक्षा 10 अंग्रेज़ी' : 'English' %>
+          </h3>
+          <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
+            <%= (lang === 'hi') ? 'पत्र लेखन, Tenses, Active-Passive Voice एवं समझ' : 'Formal Letters, Daily Tenses & Reading Comprehension' %>
+          </p>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem;">
+            <span><%= (lang === 'hi') ? 'प्रगति' : 'Progress' %></span>
+            <span style="color: #9333EA;">64%</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: 64%; background-color: #9333EA;"></div>
+          </div>
+          <a href="/learn/class-10-english" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 1rem;">
+            <%= (lang === 'hi') ? 'पढ़ना जारी रखें' : 'Continue' %>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: Quick Actions (5 Cards) -->
+  <section style="margin-bottom: 3rem;">
+    <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.25rem;">
+      <%= (lang === 'hi') ? 'त्वरित कार्य (Quick Actions)' : 'Quick Actions' %>
+    </h2>
+
+    <div class="quick-actions-grid">
+      <!-- 1. Ask AI Tutor -->
+      <a href="/tutor" class="quick-action-card">
+        <div class="quick-action-icon">🤖</div>
+        <div class="quick-action-title"><%= (lang === 'hi') ? 'एआई ट्यूटर से पूछें' : 'Ask AI Tutor' %></div>
+      </a>
+
+      <!-- 2. Voice Question -->
+      <a href="/tutor?mode=voice" class="quick-action-card">
+        <div class="quick-action-icon">🎤</div>
+        <div class="quick-action-title"><%= (lang === 'hi') ? 'आवाज़ से प्रश्न (Voice)' : 'Voice Question' %></div>
+      </a>
+
+      <!-- 3. Find Scholarships -->
+      <a href="/scholarships" class="quick-action-card">
+        <div class="quick-action-icon">🎓</div>
+        <div class="quick-action-title"><%= (lang === 'hi') ? 'छात्रवृत्ति खोजें' : 'Find Scholarships' %></div>
+      </a>
+
+      <!-- 4. Career Guidance -->
+      <a href="/career" class="quick-action-card">
+        <div class="quick-action-icon">🧭</div>
+        <div class="quick-action-title"><%= (lang === 'hi') ? 'करियर मार्गदर्शन' : 'Career Guidance' %></div>
+      </a>
+
+      <!-- 5. Find Mentor -->
+      <a href="/mentors" class="quick-action-card">
+        <div class="quick-action-icon">👨‍🏫</div>
+        <div class="quick-action-title"><%= (lang === 'hi') ? 'मेंटर खोजें' : 'Find Mentor' %></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Section: Recommended For You -->
+  <section style="margin-bottom: 3rem;">
+    <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.25rem;">
+      <%= (lang === 'hi') ? 'आपके लिए अनुशंसित पाठ (Recommended For You)' : 'Recommended For You' %>
+    </h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+      <% if (recommendedLessons && recommendedLessons.length > 0) { %>
+        <% recommendedLessons.forEach(lesson => { %>
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span class="badge badge-slate" style="color: <%= lesson.course_color %>;">
+                  <%= (lang === 'hi') ? lesson.course_title_hi : lesson.course_title %>
+                </span>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Lesson <%= lesson.order_index %></span>
+              </div>
+              <h4 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.35rem;">
+                <%= (lang === 'hi') ? lesson.title_hi : lesson.title %>
+              </h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">
+                <%= (lang === 'hi') ? lesson.summary_hi : lesson.summary %>
+              </p>
+            </div>
+            <div style="margin-top: 1rem;">
+              <a href="/learn/lesson/<%= lesson.id %>" class="btn btn-outline-primary btn-sm" style="width: 100%;">
+                <%= (lang === 'hi') ? 'पाठ खोलें →' : 'Open Lesson →' %>
+              </a>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+          <p><%= (lang === 'hi') ? 'आपने कई पाठ पूरे कर लिए हैं! नए पाठ देखने के लिए विषय सूची में जाएं।' : 'You have made great progress! Check course catalog for more.' %></p>
+        </div>
+      <% } %>
+    </div>
+  </section>
+
+  <!-- Section: Your Opportunities (Scholarships) -->
+  <section>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);">
+        <%= (lang === 'hi') ? 'आपके अवसर (Your Opportunities)' : 'Your Opportunities' %>
+      </h2>
+      <a href="/scholarships" style="font-weight: 600; font-size: 0.9rem; color: var(--primary);">
+        <%= (lang === 'hi') ? 'सभी छात्रवृत्तियां देखें →' : 'View all scholarships →' %>
+      </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem;">
+      <% if (scholarshipsPreview && scholarshipsPreview.length > 0) { %>
+        <% scholarshipsPreview.forEach(s => { %>
+          <div class="card" style="border-left: 4px solid var(--accent); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.35rem;">
+                <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-main);">
+                  <%= (lang === 'hi') ? s.name_hi : s.name %>
+                </h4>
+                <span class="badge badge-warning" style="white-space: nowrap;"><%= s.category %></span>
+              </div>
+              <div style="font-size: 0.775rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                🏛️ <%= s.provider %>
+              </div>
+              <div style="font-weight: 700; color: #065F46; font-size: 0.95rem; margin-bottom: 0.5rem;">
+                💰 <%= s.benefit_amount %>
+              </div>
+              <p style="font-size: 0.825rem; color: var(--text-muted); line-height: 1.4;">
+                <%= (lang === 'hi') ? s.description_hi : s.description %>
+              </p>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">
+              <span style="color: #DC2626; font-weight: 600;">⏰ <%= s.deadline %></span>
+              <a href="/scholarships" class="btn btn-sm btn-secondary"><%= (lang === 'hi') ? 'विवरण देखें' : 'Details' %></a>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

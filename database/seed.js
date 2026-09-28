@@ -1,0 +1,1142 @@
+const bcrypt = require('bcryptjs');
+const db = require('./database');
+
+async function seed() {
+  console.log('🌱 Seeding EduSaarthi database...');
+
+  // Clear existing data to allow idempotent re-seeding
+  db.exec(`
+    DELETE FROM mentor_requests;
+    DELETE FROM progress;
+    DELETE FROM lessons;
+    DELETE FROM courses;
+    DELETE FROM scholarships;
+    DELETE FROM mentors;
+    DELETE FROM users;
+  `);
+
+  // 1. Seed Demo User
+  const salt = await bcrypt.genSalt(10);
+  const passwordHash = await bcrypt.hash('Demo@123', salt);
+
+  const userInsert = db.run(
+    `INSERT INTO users (name, email, password_hash, state, preferred_language, education_level)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    ['Rahul Kumar', 'demo@edusaarthi.test', passwordHash, 'Jharkhand', 'hi', 'Class 10']
+  );
+  const demoUserId = userInsert.lastInsertRowid;
+  console.log(`✓ Demo student created: demo@edusaarthi.test (ID: ${demoUserId})`);
+
+  // 2. Seed Courses
+  const courses = [
+    {
+      slug: 'class-10-science',
+      title: 'Class 10 Science',
+      title_hi: 'कक्षा 10 विज्ञान',
+      category: 'Science',
+      education_level: 'Class 10',
+      description: 'Master core concepts of Physics, Chemistry, and Biology with everyday village and practical life examples.',
+      description_hi: 'दैनिक जीवन और ग्रामीण उदाहरणों के साथ भौतिकी, रसायन और जीव विज्ञान की मुख्य अवधारणाओं को समझें।',
+      icon: 'atom',
+      color: '#0284C7',
+      total_lessons: 5,
+      order_index: 1
+    },
+    {
+      slug: 'class-10-mathematics',
+      title: 'Class 10 Mathematics',
+      title_hi: 'कक्षा 10 गणित',
+      category: 'Mathematics',
+      education_level: 'Class 10',
+      description: 'Step-by-step problem solving for numbers, algebra, geometry, and real-life mathematical reasoning.',
+      description_hi: 'संख्याओं, बीजगणित, ज्यामिति और वास्तविक जीवन के गणितीय प्रश्नों का चरण-दर-चरण समाधान।',
+      icon: 'calculator',
+      color: '#16A34A',
+      total_lessons: 5,
+      order_index: 2
+    },
+    {
+      slug: 'class-10-english',
+      title: 'Class 10 English',
+      title_hi: 'कक्षा 10 अंग्रेज़ी',
+      category: 'English',
+      education_level: 'Class 10',
+      description: 'Build confidence in reading, writing formal letters, spoken conversation, and grammatical foundations.',
+      description_hi: 'अंग्रेज़ी पढ़ने, औपचारिक पत्र लिखने, बातचीत करने और व्याकरण के बुनियादी नियमों में आत्मविश्वास बढ़ाएं।',
+      icon: 'book-open',
+      color: '#9333EA',
+      total_lessons: 4,
+      order_index: 3
+    },
+    {
+      slug: 'class-10-social-science',
+      title: 'Class 10 Social Science',
+      title_hi: 'कक्षा 10 सामाजिक विज्ञान',
+      category: 'Social Science',
+      education_level: 'Class 10',
+      description: 'Explore Indian history, democratic rights, resources, and rural economic livelihood systems.',
+      description_hi: 'भारतीय इतिहास, लोकतांत्रिक अधिकारों, प्राकृतिक संसाधनों और ग्रामीण आजीविका प्रणालियों को समझें।',
+      icon: 'globe',
+      color: '#D97706',
+      total_lessons: 3,
+      order_index: 4
+    },
+    {
+      slug: 'digital-literacy-cs',
+      title: 'Computer Science & Digital Literacy',
+      title_hi: 'कंप्यूटर विज्ञान एवं डिजिटल साक्षरता',
+      category: 'Computer Science',
+      education_level: 'Class 10',
+      description: 'Learn computer fundamentals, internet safety, smartphone digital tools, and introductory logic.',
+      description_hi: 'कंप्यूटर के बुनियादी सिद्धांत, इंटरनेट सुरक्षा, उपयोगी डिजिटल सेवाएं और कोडिंग का परिचय।',
+      icon: 'laptop',
+      color: '#4F46E5',
+      total_lessons: 3,
+      order_index: 5
+    }
+  ];
+
+  const courseIds = {};
+  for (const c of courses) {
+    const res = db.run(
+      `INSERT INTO courses (slug, title, title_hi, category, education_level, description, description_hi, icon, color, total_lessons, order_index)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [c.slug, c.title, c.title_hi, c.category, c.education_level, c.description, c.description_hi, c.icon, c.color, c.total_lessons, c.order_index]
+    );
+    courseIds[c.slug] = res.lastInsertRowid;
+  }
+  console.log(`✓ 5 Courses seeded`);
+
+  // 3. Seed Lessons (20 lessons total)
+  const lessons = [
+    // Course 1: Science (5 mandatory specified lessons)
+    {
+      course_id: courseIds['class-10-science'],
+      slug: 'chemical-reactions',
+      title: 'Chemical Reactions and Equations',
+      title_hi: 'रासायनिक अभिक्रियाएँ एवं समीकरण',
+      order_index: 1,
+      summary: 'Understand how substances transform when old bonds break and new bonds form, with everyday agricultural and kitchen observations.',
+      summary_hi: 'समझें कि रासायनिक बंध टूटने और नए बंध बनने से पदार्थ कैसे बदलते हैं, रसोई और खेती के आम उदाहरणों के साथ।',
+      content: `### What is a Chemical Reaction?
+A chemical reaction is a process where one or more substances (called **reactants**) react to form completely new substances with different properties (called **products**).
+
+#### How to Identify a Chemical Change:
+1. **Change in state** (e.g., liquid turning into a solid precipitate)
+2. **Change in color** (e.g., iron rusting turns reddish-brown)
+3. **Evolution of gas** (e.g., zinc in acid creates hydrogen gas bubbles)
+4. **Change in temperature** (e.g., adding water to unslaked lime produces intense heat)
+
+### Balanced Chemical Equations
+According to the **Law of Conservation of Mass**, matter can neither be created nor destroyed in a chemical reaction. Therefore:
+*The total number of atoms of each element on the reactant side must equal the total number of atoms on the product side.*
+
+For example:
+$$\\text{CH}_4 + 2\\text{O}_2 \\rightarrow \\text{CO}_2 + 2\\text{H}_2\\text{O} + \\text{Heat}$$`,
+      content_hi: `### रासायनिक अभिक्रिया क्या है?
+रासायनिक अभिक्रिया वह प्रक्रिया है जिसमें एक या एक से अधिक पदार्थ (जिन्हें **अभिकारक** कहा जाता है) आपस में मिलकर नए गुणों वाले नए पदार्थ (जिन्हें **उत्पाद** कहा जाता है) बनाते हैं।
+
+#### रासायनिक परिवर्तन के मुख्य संकेत:
+1. **अवस्था में परिवर्तन** (जैसे दूध का दही में बदलना)
+2. **रंग में परिवर्तन** (जैसे लोहे के औजारों पर लाल-भूरे रंग का जंग लगना)
+3. **गैस का निकलना** (जैसे चूने के पानी में बुलबुले बनना)
+4. **तापमान में परिवर्तन** (जैसे बिना बुझे चूने में पानी डालने पर गर्मी निकलना)
+
+### संतुलित रासायनिक समीकरण
+**द्रव्यमान संरक्षण के नियम** के अनुसार, किसी भी रासायनिक अभिक्रिया में द्रव्यमान का न तो निर्माण होता है और न ही विनाश। इसलिए अभिकारक और उत्पाद दोनों तरफ प्रत्येक तत्व के परमाणुओं की संख्या बराबर होनी चाहिए।`,
+      examples: `**Everyday Village Observation:**
+1. **Slaking of Lime (सफेदी की तैयारी):** When quicklime (CaO) is soaked in water for whitewashing house walls, it sizzles vigorously and becomes calcium hydroxide [Ca(OH)2], releasing huge heat.
+2. **Rusting of Iron Plow:** An iron plow blade left out in monsoon dampness reacts with atmospheric oxygen and moisture to form hydrated ferric oxide (rust).`,
+      examples_hi: `**दैनिक जीवन के उदाहरण:**
+1. **दीवारों की सफेदी:** जब बिना बुझे चूने (CaO) में पानी डाला जाता है, तो सनसनाहट के साथ भारी मात्रा में ऊष्मा निकलती है और बुझा हुआ चूना [Ca(OH)2] बनता है।
+2. **लोहे के हल में जंग लगना:** बरसात में नमी और हवा के संपर्क में आने से लोहे के औजारों पर लाल-भूरे रंग की परत जम जाती है।`,
+      key_points: JSON.stringify([
+        'Reactants transform into products with entirely new physical and chemical properties.',
+        'Mass is always conserved: balance equations by changing coefficients, never chemical formulas.',
+        'Exothermic reactions release heat (like respiration); endothermic reactions absorb heat (like photosynthesis).'
+      ]),
+      key_points_hi: JSON.stringify([
+        'अभिकारक नए रासायनिक गुणों वाले उत्पादों में परिवर्तित होते हैं।',
+        'द्रव्यमान सदैव संरक्षित रहता है: केवल गुणांक बदलें, रासायनिक सूत्र कभी न बदलें।',
+        'ऊष्माक्षेपी अभिक्रियाओं में ऊष्मा निकलती है (जैसे श्वसन), ऊष्माशोषी में ऊष्मा सोखी जाती है।'
+      ]),
+      quiz_data: JSON.stringify([
+        {
+          question: 'What is formed when Quicklime (CaO) reacts vigorously with water?',
+          options: ['Calcium Carbonate', 'Slaked Lime [Ca(OH)2]', 'Calcium Chloride', 'Oxygen gas'],
+          answer: 1,
+          explanation: 'Calcium oxide reacts vigorously with water to produce slaked lime (calcium hydroxide) releasing a large amount of heat.'
+        },
+        {
+          question: 'Why do we balance chemical equations?',
+          options: ['To look neat', 'To satisfy the Law of Conservation of Mass', 'To increase speed', 'To produce more gas'],
+          answer: 1,
+          explanation: 'Chemical equations must be balanced to satisfy the Law of Conservation of Mass: atoms are neither created nor destroyed.'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-science'],
+      slug: 'acids-bases-salts',
+      title: 'Acids, Bases and Salts',
+      title_hi: 'अम्ल, क्षारक एवं लवण',
+      order_index: 2,
+      summary: 'Distinguish between sour acids and bitter bases, understand the pH scale, and explore common salts used in every household.',
+      summary_hi: 'खट्टे अम्ल और कड़वे क्षारकों में अंतर समझें, pH स्केल जानें और घर-घर में उपयोग होने वाले लवणों के बारे में पढ़ें।',
+      content: `### Nature of Acids and Bases
+- **Acids:** Sour in taste, turn blue litmus paper red, release $H^+$ ions in aqueous solution (e.g., citric acid in lemons, acetic acid in vinegar).
+- **Bases:** Bitter in taste, soapy to touch, turn red litmus paper blue, release $OH^-$ ions in water (e.g., soap solution, baking soda, slaked lime).
+
+### The pH Scale (Power of Hydrogen)
+The pH scale measures how acidic or basic a water-based solution is:
+- **pH < 7:** Acidic (stomach acid is ~1.5 - 2.0; lemon juice is ~2.2)
+- **pH = 7:** Neutral (pure drinking water)
+- **pH > 7:** Basic (blood is ~7.4; soap solution is ~9-10; milk of magnesia is ~10.5)
+
+### Neutralization Reaction
+When an acid and a base react, they neutralize each other to produce salt and water:
+$$\\text{Acid} + \\text{Base} \\rightarrow \\text{Salt} + \\text{Water}$$
+$$\\text{HCl} + \\text{NaOH} \\rightarrow \\text{NaCl} + \\text{H}_2\\text{O}$$`,
+      content_hi: `### अम्ल और क्षारक की पहचान
+- **अम्ल:** स्वाद में खट्टे होते हैं, नीले लिटमस को लाल कर देते हैं और जल में $H^+$ आयन देते हैं (जैसे नींबू, इमली, सिरका)।
+- **क्षारक:** स्वाद में कड़वे और छूने में साबुन जैसे चिकने होते हैं, लाल लिटमस को नीला करते हैं और जल में $OH^-$ आयन देते हैं (जैसे चूना, साबुन, बेकिंग सोडा)।
+
+### pH पैमाना
+pH पैमाना किसी विलयन में हाइड्रोजन आयन की सांद्रता मापता है:
+- **pH 7 से कम:** अम्लीय विलयन
+- **pH 7:** उदासीन (शुद्ध जल)
+- **pH 7 से अधिक:** क्षारकीय विलयन`,
+      examples: `**Everyday Remedy:**
+When someone suffers from stomach acidity after heavy meals, taking an antacid (a mild base like Baking Soda or Milk of Magnesia) neutralizes the excess stomach acid and provides rapid relief.`,
+      examples_hi: `**घरेलू उपाय:**
+जब पेट में अधिक अम्लता (एसिडिटी) हो जाती है, तो हल्का क्षारक जैसे बेकिंग सोडा या मिल्क ऑफ मैग्नीशिया लेने से अतिरिक्त अम्ल उदासीन हो जाता है और तुरंत आराम मिलता है।`,
+      key_points: JSON.stringify([
+        'Acids produce H+ ions; Bases produce OH- ions in water.',
+        'pH of soil directly influences crop yield; farmers add lime to overly acidic fields.',
+        'Common salt (NaCl) is the raw material for making baking soda, washing soda, and bleaching powder.'
+      ]),
+      key_points_hi: JSON.stringify([
+        'अम्ल जल में H+ आयन और क्षारक OH- आयन प्रदान करते हैं।',
+        'मिट्टी का pH फसल की पैदावार तय करता है; किसान अम्लीय खेत में चूना मिलाते हैं।',
+        'साधारण नमक (NaCl) बेकिंग सोडा, धावन सोडा और ब्लीचिंग पाउडर बनाने का आधार है।'
+      ]),
+      quiz_data: JSON.stringify([
+        {
+          question: 'What color does blue litmus paper turn when dipped in lemon juice?',
+          options: ['Yellow', 'Red', 'Green', 'No change'],
+          answer: 1,
+          explanation: 'Lemon juice contains citric acid, which turns blue litmus paper red.'
+        },
+        {
+          question: 'What is the pH value of pure neutral water at room temperature?',
+          options: ['0', '7', '14', '5.5'],
+          answer: 1,
+          explanation: 'Pure water is neutral and has a pH of exactly 7.'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-science'],
+      slug: 'life-processes',
+      title: 'Life Processes: Nutrition, Respiration & Transport',
+      title_hi: 'जैव प्रक्रम: पोषण, श्वसन एवं वहन',
+      order_index: 3,
+      summary: 'Explore the fundamental bodily processes that maintain life: nutrition, cellular respiration, transport, and excretion.',
+      summary_hi: 'सजीवों के जीवन को बनाए रखने वाले आवश्यक प्रक्रमों जैसे पोषण, श्वसन, परिवहन और उत्सर्जन को विस्तार से समझें।',
+      content: `### What are Life Processes?
+The maintenance functions of living organisms must go on even when they are asleep. The basic biological processes essential for maintaining life are **Nutrition**, **Respiration**, **Transportation**, and **Excretion**.
+
+### 1. Autotrophic Nutrition (Photosynthesis)
+Green plants capture sunlight energy using **chlorophyll** to convert water and carbon dioxide into glucose:
+$$6\\text{CO}_2 + 6\\text{H}_2\\text{O} \\xrightarrow[\\text{Chlorophyll}]{\\text{Sunlight}} \\text{C}_6\\text{H}_{12}\\text{O}_6 + 6\\text{O}_2$$
+
+Key stages:
+1. Absorption of light energy by chlorophyll.
+2. Conversion of light energy to chemical energy and splitting of water molecules into hydrogen and oxygen.
+3. Reduction of carbon dioxide to carbohydrates.
+
+### 2. Human Transportation
+The human heart is a muscular pump with 4 chambers (two atria and two ventricles) ensuring oxygen-rich blood does not mix with carbon dioxide-rich blood.`,
+      content_hi: `### जैव प्रक्रम क्या हैं?
+वे सभी प्रक्रम जो संयुक्त रूप से सजीवों के शरीर की मरम्मत और रख-रखाव का कार्य करते हैं, जैव प्रक्रम कहलाते हैं। इसमें मुख्य रूप से **पोषण**, **श्वसन**, **वहन** और **उत्सर्जन** शामिल हैं।
+
+### 1. प्रकाश संश्लेषण (Photosynthesis)
+पौधे सूर्य के प्रकाश और क्लोरोफिल की उपस्थिति में वायु से कार्बन डाइऑक्साइड ($CO_2$) और भूमि से जल ($H_2O$) लेकर कार्बोहाइड्रेट (ग्लूकोज) और ऑक्सीजन बनाते हैं:
+$$6\\text{CO}_2 + 6\\text{H}_2\\text{O} \\rightarrow \\text{C}_6\\text{H}_{12}\\text{O}_6 + 6\\text{O}_2$$`,
+      examples: `**Nature Connection:**
+Plants open their microscopic leaf pores (stomata) to exchange gases. During dry afternoons, desert and dry-region plants close their stomata to prevent excessive water loss by transpiration.`,
+      examples_hi: `**प्रकृति से जुड़ाव:**
+पत्तियों की निचली सतह पर छोटे-छोटे छिद्र (रंध्र / स्टोमेटा) होते हैं जिनसे गैसों का आदान-प्रदान होता है। दोपहर की तेज धूप में पानी की बर्बादी रोकने के लिए रंध्र बंद हो जाते हैं।`,
+      key_points: JSON.stringify([
+        'Autotrophs make their own food; heterotrophs depend directly or indirectly on autotrophs.',
+        'Stomata regulate gas exchange and transpiration using guard cells.',
+        'Xylem transports water and minerals upward; Phloem transports food prepared in leaves.'
+      ]),
+      key_points_hi: JSON.stringify([
+        'स्वपोषी अपना भोजन स्वयं बनाते हैं; विषमपोषी दूसरों पर निर्भर होते हैं।',
+        'रंध्र (स्टोमेटा) द्वार कोशिकाओं द्वारा गैसों का आदान-प्रदान नियंत्रित करते हैं।',
+        'जाइलम जड़ों से जल और खनिज पहुंचाता है; फ्लोएम पत्तियों में बने भोजन का संवहन करता है।'
+      ]),
+      quiz_data: JSON.stringify([
+        {
+          question: 'Which plant tissue is responsible for carrying water from roots to leaves?',
+          options: ['Phloem', 'Xylem', 'Cortex', 'Pith'],
+          answer: 1,
+          explanation: 'Xylem conducts water and dissolved minerals upward from roots throughout the plant.'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-science'],
+      slug: 'light-reflection-refraction',
+      title: 'Light - Reflection and Refraction',
+      title_hi: 'प्रकाश - परावर्तन तथा अपवर्तन',
+      order_index: 4,
+      summary: 'Discover how curved mirrors form images, why pencils look bent in water, and the formulas behind lenses and spectacles.',
+      summary_hi: 'गोलीय दर्पणों से बनने वाले प्रतिबिंब, पानी में रखी पेंसिल का मुड़ा दिखना और चश्मे के लेंस का रहस्य समझें।',
+      content: `### Laws of Reflection
+1. The angle of incidence ($\\angle i$) is always equal to the angle of reflection ($\\angle r$).
+2. The incident ray, reflected ray, and normal at the point of incidence all lie in the same plane.
+
+### Spherical Mirrors
+- **Concave Mirror (अभिसारी):** Curves inward. Used in headlights, solar cookers, and dentist mirrors because it can focus light or form enlarged upright images when placed close.
+- **Convex Mirror (अपसारी):** Curves outward. Gives an upright, diminished image with a very wide field of view. Used as vehicle rear-view mirrors.
+
+### Refraction of Light
+When light passes from one transparent medium to another with different optical density (e.g., from air to water or glass), its speed changes, causing it to bend.
+- Denser to rarer medium: bends **away** from the normal.
+- Rarer to denser medium: bends **towards** the normal.`,
+      content_hi: `### परावर्तन के नियम
+1. आपतन कोण ($\\angle i$) सदैव परावर्तन कोण ($\\angle r$) के बराबर होता है।
+2. आपतित किरण, परावर्तित किरण तथा आपतन बिंदु पर अभिलंब तीनों एक ही तल में होते हैं।
+
+### गोलीय दर्पण
+- **अवतल दर्पण:** अंदर की ओर मुड़ा होता है। इसका उपयोग टॉर्च, गाड़ियों की हेडलाइट और सौर कुकर में प्रकाश को एक जगह केंद्रित करने के लिए किया जाता है।
+- **उत्तल दर्पण:** बाहर की ओर उभरा होता है। यह हमेशा सीधा और छोटा प्रतिबिंब बनाता है, जिससे पीछे का बहुत बड़ा क्षेत्र दिखाई देता है (गाड़ियों का साइड मिरर)।`,
+      examples: `**Observing Refraction in a Village Well or Bucket:**
+If you place a straight wooden stick into a clear bucket of water, the stick appears broken or bent at the water surface due to the bending of light rays as they leave water into air.`,
+      examples_hi: `**बाल्टी में अपवर्तन का प्रयोग:**
+पानी से भरी बाल्टी में जब आप एक सीधी छड़ी या पेंसिल डालते हैं, तो पानी की सतह पर वह मुड़ी हुई नजर आती है क्योंकि प्रकाश पानी से हवा में आते समय मुड़ जाता है।`,
+      key_points: JSON.stringify([
+        'Convex mirrors are used in car rear-view mirrors because they always give an erect image with a wide rear view.',
+        'Refraction is caused by the change in speed of light as it moves between different media.',
+        'Power of a lens is measured in Dioptres (D = 1/f in meters).'
+      ]),
+      key_points_hi: JSON.stringify([
+        'उत्तल दर्पण गाड़ियों के साइड मिरर में लगते हैं क्योंकि वे सीधा प्रतिबिंब और विस्तृत दृष्टि-क्षेत्र देते हैं।',
+        'प्रकाश की चाल बदलने के कारण अपवर्तन (मुड़ना) होता है।',
+        'लेंस की क्षमता का मात्रक डायोप्टर (D = 1/f मीटर में) होता है।'
+      ]),
+      quiz_data: JSON.stringify([
+        {
+          question: 'Why are convex mirrors preferred as vehicle rear-view mirrors?',
+          options: ['They show magnified upside-down images', 'They show erect images and offer a much wider field of view', 'They absorb sunlight', 'They cost nothing'],
+          answer: 1,
+          explanation: 'Convex mirrors always provide an upright, diminished view, giving drivers a comprehensive view of the traffic behind them.'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-science'],
+      slug: 'electricity',
+      title: 'Electricity: Circuits, Ohm’s Law & Power',
+      title_hi: 'विद्युत: परिपथ, ओम का नियम एवं शक्ति',
+      order_index: 5,
+      summary: 'Master electrical current, voltage differences, Ohm’s law, domestic wiring, and electrical energy conservation.',
+      summary_hi: 'विद्युत धारा, विभवांतर, ओम का नियम, घरेलू वायरिंग और बिजली की बचत के सिद्धांतों को स्पष्ट समझें।',
+      content: `### Electric Current and Circuit
+An electric current ($I$) is defined as the rate of flow of electric charges through a conductor:
+$$I = \\frac{Q}{t}$$
+The SI unit of electric charge is Coulomb ($C$) and electric current is Ampere ($A$).
+
+### Ohm's Law
+At a constant temperature, the electric current flowing through a metallic conductor is directly proportional to the potential difference ($V$) across its ends:
+$$V \\propto I \\implies V = I \\times R$$
+Where $R$ is the electrical **Resistance** of the conductor, measured in Ohms ($\\Omega$).
+
+### Resistors in Series and Parallel
+- **Series:** $R_{\\text{eq}} = R_1 + R_2 + R_3$ (current is constant; if one breaks, all go out).
+- **Parallel:** $\\frac{1}{R_{\\text{eq}}} = \\frac{1}{R_1} + \\frac{1}{R_2} + \\frac{1}{R_3}$ (voltage is equal across each branch; ideal for home wiring).`,
+      content_hi: `### विद्युत धारा और परिपथ
+किसी चालक तार में विद्युत आवेश के प्रवाह की दर को **विद्युत धारा** ($I$) कहते हैं:
+$$I = \\frac{Q}{t}$$
+विद्युत धारा का SI मात्रक **एम्पीयर** ($A$) होता है।
+
+### ओम का नियम
+नियत ताप पर किसी चालक के सिरों के बीच का विभवांतर ($V$) उसमें बहने वाली धारा ($I$) के समानुपाती होता है:
+$$V = I \\times R$$
+जहाँ $R$ चालक का **प्रतिरोध** है, जिसका मात्रक ओम ($\\Omega$) होता है।`,
+      examples: `**Solar Lanterns in Off-Grid Hamlets:**
+In rural solar home lights, 12V DC storage batteries feed LED lamps wired in parallel so that switching off the porch light does not cut power to the study bulb or charging socket.`,
+      examples_hi: `**सोलर लाइट का व्यावहारिक उदाहरण:**
+गांवों में सोलर बैटरी से चलने वाली लाइटें समानांतर क्रम (Parallel) में जुड़ी होती हैं, ताकि अगर आंगन का बल्ब बंद भी किया जाए, तो कमरे की लाइट और मोबाइल चार्जिंग चलती रहे।`,
+      key_points: JSON.stringify([
+        'Current is charge over time (I = Q/t).',
+        'Ohm’s law relates Voltage, Current, and Resistance (V = IR).',
+        'Homes are wired in parallel so each appliance receives full standard voltage independently.'
+      ]),
+      key_points_hi: JSON.stringify([
+        'धारा आवेश प्रवाह की दर है (I = Q/t)।',
+        'ओम का नियम विभवांतर, धारा और प्रतिरोध को जोड़ता है (V = IR)।',
+        'घरों में उपकरण समानांतर क्रम में जोड़े जाते हैं ताकि सबको पूरी वोल्टेज मिले।'
+      ]),
+      quiz_data: JSON.stringify([
+        {
+          question: 'If a 12V battery produces a 3A current in a coil, what is the resistance?',
+          options: ['36 Ohms', '4 Ohms', '15 Ohms', '0.25 Ohms'],
+          answer: 1,
+          explanation: 'Using Ohm’s Law: R = V / I = 12 / 3 = 4 Ohms.'
+        }
+      ])
+    },
+
+    // Course 2: Mathematics (5 lessons)
+    {
+      course_id: courseIds['class-10-mathematics'],
+      slug: 'real-numbers',
+      title: 'Real Numbers & Fundamental Theorem of Arithmetic',
+      title_hi: 'वास्तविक संख्याएं एवं अंकगणित की आधारभूत प्रमेय',
+      order_index: 1,
+      summary: 'Explore prime factorizations, HCF and LCM calculations, and proving irrationality of square roots.',
+      summary_hi: 'अभाज्य गुणनखंडन, म.स. (HCF) और ल.स. (LCM) की गणना तथा अपरिमेय संख्याओं के प्रमाण।',
+      content: `### Fundamental Theorem of Arithmetic
+Every composite number can be expressed (factorized) as the product of primes uniquely, apart from the order in which the prime factors occur.
+
+#### HCF and LCM Relationship:
+For any two positive integers $a$ and $b$:
+$$\\text{HCF}(a, b) \\times \\text{LCM}(a, b) = a \\times b$$`,
+      content_hi: `### अंकगणित की आधारभूत प्रमेय
+प्रत्येक भाज्य संख्या को अभाज्य संख्याओं के एक गुणनफल के रूप में व्यक्त किया जा सकता है।
+
+#### म.स. और ल.स. का संबंध:
+किन्हीं दो धनात्मक पूर्णांकों $a$ और $b$ के लिए:
+$$\\text{HCF}(a, b) \\times \\text{LCM}(a, b) = a \\times b$$`,
+      examples: `**Tiling a Courtyard:**
+Finding the largest square tile to pave a 12m by 18m veranda without cutting any tile requires finding the HCF(12, 18) = 6 meters.`,
+      examples_hi: `**आंगन में टाइल लगाना:**
+12 मीटर लंबे और 18 मीटर चौड़े दालान में बिना काटे सबसे बड़ी वर्गाकार टाइल लगाने के लिए 12 और 18 का HCF = 6 मीटर होगा।`,
+      key_points: JSON.stringify(['Prime factorization is unique.', 'HCF x LCM = Product of two numbers.', 'Square root of any prime is irrational.']),
+      key_points_hi: JSON.stringify(['अभाज्य गुणनखंड अद्वितीय होता है।', 'HCF x LCM = दोनों संख्याओं का गुणनफल।', 'अभाज्य संख्या का वर्गमूल अपरिमेय होता है।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'If HCF(a, b) = 4 and a * b = 120, what is LCM(a, b)?',
+          options: ['480', '30', '16', '124'],
+          answer: 1,
+          explanation: 'LCM = (a * b) / HCF = 120 / 4 = 30.'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-mathematics'],
+      slug: 'polynomials',
+      title: 'Polynomials and Zeroes',
+      title_hi: 'बहुपद और उनके शून्यक',
+      order_index: 2,
+      summary: 'Learn quadratic polynomials, relationships between coefficients and zeroes, and graph intersections.',
+      summary_hi: 'द्विघात बहुपद, गुणांकों और शून्यकों के बीच संबंध और आलेखीय विधि।',
+      content: `For a quadratic polynomial $ax^2 + bx + c$, if $\\alpha$ and $\\beta$ are zeroes:
+- Sum of zeroes: $\\alpha + \\beta = -\\frac{b}{a}$
+- Product of zeroes: $\\alpha \\cdot \\beta = \\frac{c}{a}$`,
+      content_hi: `द्विघात बहुपद $ax^2 + bx + c$ के लिए, यदि शून्यक $\\alpha$ और $\\beta$ हैं:
+- शून्यकों का योग: $\\alpha + \\beta = -\\frac{b}{a}$
+- शून्यकों का गुणनफल: $\\alpha \\cdot \\beta = \\frac{c}{a}$`,
+      examples: `In projectile motion (throwing a cricket ball or stone), the path follows a parabolic curve represented by a quadratic polynomial.`,
+      examples_hi: `क्रिकेट की गेंद या पत्थर फेंकने पर उसका मार्ग एक परवलय (Parabola) बनाता है जिसे द्विघात बहुपद से दर्शाते हैं।`,
+      key_points: JSON.stringify(['The degree tells the maximum number of zeroes.', 'The graph cuts x-axis at its real zeroes.']),
+      key_points_hi: JSON.stringify(['बहुपद की घात उसके अधिकतम शून्यकों की संख्या बताती है।', 'ग्राफ x-अक्ष को शून्यकों पर काटता है।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'What is the sum of zeroes for x^2 - 5x + 6?',
+          options: ['-5', '5', '6', '-6'],
+          answer: 1,
+          explanation: 'Sum = -(-5)/1 = 5.'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-mathematics'],
+      slug: 'linear-equations',
+      title: 'Pair of Linear Equations in Two Variables',
+      title_hi: 'दो चरों वाले रैखिक समीकरण युग्म',
+      order_index: 3,
+      summary: 'Solve simultaneous equations using elimination, substitution, and graphical intersection methods.',
+      summary_hi: 'विलोपन, प्रतिस्थापन और आलेखीय विधियों से दो अज्ञात मानों को ज्ञात करना सीखें।',
+      content: `A pair of linear equations $a_1x + b_1y + c_1 = 0$ and $a_2x + b_2y + c_2 = 0$ has:
+- Exactly one unique solution if $\\frac{a_1}{a_2} \\neq \\frac{b_1}{b_2}$ (Intersecting lines)
+- Infinitely many solutions if $\\frac{a_1}{a_2} = \\frac{b_1}{b_2} = \\frac{c_1}{c_2}$ (Coincident lines)
+- No solution if $\\frac{a_1}{a_2} = \\frac{b_1}{b_2} \\neq \\frac{c_1}{c_2}$ (Parallel lines)`,
+      content_hi: `दो चरों वाले समीकरणों के हल:
+- अद्वितीय हल: $\\frac{a_1}{a_2} \\neq \\frac{b_1}{b_2}$
+- अनंत हल: तीनों अनुपात बराबर होने पर
+- कोई हल नहीं: रेखाएं समानांतर होने पर`,
+      examples: `Cost of 2 notebooks and 3 pens is Rs 70. Cost of 4 notebooks and 1 pen is Rs 90. Finding the cost of each item uses two linear equations.`,
+      examples_hi: `2 कॉपियों और 3 पेनों का मूल्य ₹70 है। 4 कॉपियों और 1 पेन का मूल्य ₹90 है। प्रत्येक का मूल्य ज्ञात करने के लिए दो चरों वाले समीकरण का उपयोग होता है।`,
+      key_points: JSON.stringify(['Substitution or elimination methods simplify calculations.', 'Parallel lines never intersect, yielding no common solution.']),
+      key_points_hi: JSON.stringify(['विलोपन और प्रतिस्थापन विधियों से आसानी से हल निकलता है।', 'समानांतर रेखाएं कभी नहीं मिलतीं, इसलिए कोई हल नहीं होता।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'If two lines are parallel, how many solutions exist?',
+          options: ['One', 'Two', 'Infinite', 'Zero'],
+          answer: 3,
+          explanation: 'Parallel lines never meet at any point, so there is zero (no) solution.'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-mathematics'],
+      slug: 'quadratic-equations',
+      title: 'Quadratic Equations & The Quadratic Formula',
+      title_hi: 'द्विघात समीकरण एवं श्रीधराचार्य सूत्र',
+      order_index: 4,
+      summary: 'Solve second-degree equations with the discriminant ($b^2 - 4ac$) and quadratic formula.',
+      summary_hi: 'विविक्तकर ($b^2 - 4ac$) और द्विघाती सूत्र द्वारा अज्ञात समीकरणों को हल करें।',
+      content: `Roots of $ax^2 + bx + c = 0$ are given by:
+$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
+- If $D = b^2 - 4ac > 0$: two distinct real roots.
+- If $D = 0$: two equal real roots.
+- If $D < 0$: no real roots.`,
+      content_hi: `द्विघात समीकरण $ax^2 + bx + c = 0$ के मूल:
+$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
+- यदि $D > 0$: दो भिन्न वास्तविक मूल।
+- यदि $D = 0$: दो बराबर वास्तविक मूल।
+- यदि $D < 0$: कोई वास्तविक मूल नहीं।`,
+      examples: `Calculating the speed of a stream or river current when a boat travels upstream and downstream.`,
+      examples_hi: `नदी के बहाव के अनुकूल और प्रतिकूल नाव चलाने पर चाल की गणना करना।`,
+      key_points: JSON.stringify(['Discriminant determines the nature of roots.', 'Quadratic formula solves any quadratic equation reliably.']),
+      key_points_hi: JSON.stringify(['विविक्तकर मूलों की प्रकृति तय करता है।', 'द्विघाती सूत्र हर द्विघात समीकरण को हल कर सकता है।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'What is the discriminant of x^2 - 4x + 4 = 0?',
+          options: ['16', '0', '-4', '8'],
+          answer: 1,
+          explanation: 'D = (-4)^2 - 4(1)(4) = 16 - 16 = 0 (two equal real roots).'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-mathematics'],
+      slug: 'arithmetic-progressions',
+      title: 'Arithmetic Progressions (AP)',
+      title_hi: 'समानांतर श्रेढ़ी (AP)',
+      order_index: 5,
+      summary: 'Find the nth term and sum of sequences where terms increase or decrease by a constant difference.',
+      summary_hi: 'निश्चित अंतर से बढ़ने या घटने वाली संख्याओं के nवें पद और योगफल की गणना करें।',
+      content: `In an Arithmetic Progression with first term $a$ and common difference $d$:
+- $n$-th term: $a_n = a + (n - 1)d$
+- Sum of first $n$ terms: $S_n = \\frac{n}{2}[2a + (n - 1)d] = \\frac{n}{2}(a + l)$`,
+      content_hi: `प्रथम पद $a$ और सार्व अंतर $d$ वाली AP के लिए:
+- $n$वां पद: $a_n = a + (n - 1)d$
+- प्रथम $n$ पदों का योग: $S_n = \\frac{n}{2}[2a + (n - 1)d]$`,
+      examples: `A student saves Rs 50 in month 1, Rs 75 in month 2, Rs 100 in month 3. Here a=50, d=25. In month 12 she saves 50 + 11*25 = Rs 325.`,
+      examples_hi: `एक छात्र पहले महीने ₹50, दूसरे महीने ₹75 और तीसरे महीने ₹100 बचाता है। 12वें महीने की बचत की गणना AP से की जा सकती है।`,
+      key_points: JSON.stringify(['Constant difference between consecutive terms is d.', 'Sum formula quickly totals large sequences.']),
+      key_points_hi: JSON.stringify(['दो लगातार पदों का अंतर सदैव समान (d) रहता है।', 'योग सूत्र से लंबी श्रृंखलाओं का योग तुरंत मिल जाता है।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'In the AP 3, 7, 11, 15..., what is the 10th term?',
+          options: ['39', '43', '36', '40'],
+          answer: 0,
+          explanation: 'a10 = 3 + (10 - 1)*4 = 3 + 36 = 39.'
+        }
+      ])
+    },
+
+    // Course 3: English (4 lessons)
+    {
+      course_id: courseIds['class-10-english'],
+      slug: 'formal-letter-writing',
+      title: 'Formal Letter Writing (Applications & Complaints)',
+      title_hi: 'औपचारिक पत्र लेखन (आवेदन एवं शिकायत पत्र)',
+      order_index: 1,
+      summary: 'Master standard formal letter formats for village panchayats, school principals, and government officers.',
+      summary_hi: 'विद्यालय प्रधानाचार्य, ग्राम पंचायत और सरकारी अधिकारियों को औपचारिक पत्र लिखने का सही प्रारूप।',
+      content: `### Structure of a Formal Letter
+1. **Sender’s Address:** Top left corner.
+2. **Date:** e.g., 28 September 2026.
+3. **Receiver’s Designation and Address:** (e.g., The Principal / The Block Development Officer).
+4. **Subject Line:** Concise and clear (e.g., *Subject: Application for Scholarship Certificate*).
+5. **Salutation:** Respected Sir / Madam.
+6. **Body:** 
+   - Opening (state purpose clearly)
+   - Details/Facts
+   - Polite closing request
+7. **Complimentary Close:** *Yours faithfully* or *Yours sincerely*.`,
+      content_hi: `### औपचारिक पत्र का प्रारूप
+1. प्रेषक का पता
+2. दिनांक
+3. प्राप्तकर्ता का पद एवं पता (जैसे प्रधानाचार्य / प्रखंड विकास पदाधिकारी)
+4. विषय (संक्षिप्त और स्पष्ट)
+5. महोदय / महोदया
+6. मुख्य विषय-वस्तु (समस्या या अनुरोध)
+7. आपका आज्ञाकारी छात्र / भवदीय`,
+      examples: `Writing an application requesting a fee concession or certificate from your school headmaster.`,
+      examples_hi: `शुल्क माफी या चरित्र प्रमाण पत्र प्राप्त करने के लिए प्रधानाचार्य को आवेदन पत्र।`,
+      key_points: JSON.stringify(['Always include a clear subject line.', 'Maintain a polite, respectful, and factual tone.']),
+      key_points_hi: JSON.stringify(['विषय रेखा सदैव स्पष्ट रखें।', 'विनम्र और सम्मानजनक भाषा का प्रयोग करें।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'Where is the Subject line placed in a formal letter?',
+          options: ['At the very end', 'Before the sender address', 'Between Receiver address and Salutation', 'On the envelope only'],
+          answer: 2,
+          explanation: 'The subject line is placed right above or below the salutation after the receiver’s address.'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-english'],
+      slug: 'tenses-and-verbs',
+      title: 'Essential Tenses for Daily Communication',
+      title_hi: 'दैनिक बातचीत के लिए आवश्यक Tenses (काल)',
+      order_index: 2,
+      summary: 'Confidently use Present, Past, and Future tenses in spoken and written English.',
+      summary_hi: 'वर्तमान, भूत और भविष्य काल का सही प्रयोग करके धाराप्रवाह वाक्य बनाना सीखें।',
+      content: `### The Three Main Tenses
+1. **Simple Present:** For routines, habits, universal truths. *(I walk to school every morning. The sun rises in the east.)*
+2. **Simple Past:** For finished actions at a specific past time. *(Yesterday, we visited the community health center.)*
+3. **Simple Future:** For decisions, promises, and future actions. *(I will study computer programming after school.)*`,
+      content_hi: `### तीन मुख्य काल
+1. **Present Tense (वर्तमान):** नित्य कर्म और आदतें (जैसे: मैं रोज स्कूल जाता हूँ)।
+2. **Past Tense (भूतकाल):** बीती हुई बातें (जैसे: हमने कल परीक्षा दी)।
+3. **Future Tense (भविष्यकाल):** आने वाले समय के कार्य (जैसे: मैं खूब मेहनत करूँगा)।`,
+      examples: `Daily conversation: "Do you understand this question?" vs "Did you finish the homework yesterday?"`,
+      examples_hi: `दैनिक बोलचाल में सही क्रिया रूप का चयन करना।`,
+      key_points: JSON.stringify(['Verbs change forms with tenses.', 'Use do/does for present questions, did for past.']),
+      key_points_hi: JSON.stringify(['काल के अनुसार क्रिया का रूप बदलता है।', 'वर्तमान में do/does तथा भूतकाल में did का प्रयोग होता है।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'Which sentence is in the Simple Past tense?',
+          options: ['She writes a story', 'She wrote a story', 'She will write a story', 'She is writing'],
+          answer: 1,
+          explanation: '"wrote" is the past tense form of the verb "write".'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-english'],
+      slug: 'active-passive-voice',
+      title: 'Active and Passive Voice',
+      title_hi: 'कर्तृवाच्य और कर्मवाच्य (Active & Passive Voice)',
+      order_index: 3,
+      summary: 'Learn how to shift focus from the doer of an action to the receiver in formal and scientific writing.',
+      summary_hi: 'वैज्ञानिक और सरकारी सूचनाओं में कर्म को प्रमुखता देने के लिए पैसिव वॉइस का प्रयोग।',
+      content: `### Active vs Passive
+- **Active Voice:** The subject performs the action. *(Rahul planted five mango saplings.)*
+- **Passive Voice:** The subject receives the action. *(Five mango saplings were planted by Rahul.)*
+Formula: Object + helping verb (be form) + past participle (V3) + by + Subject.`,
+      content_hi: `### एक्टिव और पैसिव में अंतर
+- **Active:** कर्ता कार्य करता है। (राहुल ने पौधे लगाए।)
+- **Passive:** कार्य या कर्म पर जोर दिया जाता है। (राहुल द्वारा पौधे लगाए गए।)`,
+      examples: `News reports and textbook instructions: "The experiment was conducted under controlled temperature."`,
+      examples_hi: `समाचार और सरकारी विज्ञप्तियों में: "सड़क का निर्माण पूरा कर लिया गया है।"`,
+      key_points: JSON.stringify(['Always use third form of verb (V3) in passive voice.', 'Subject becomes object.']),
+      key_points_hi: JSON.stringify(['पैसिव वॉइस में हमेशा क्रिया की तीसरी फॉर्म (V3) लगती है।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'What is the passive form of: "The farmer plows the field"?',
+          options: ['The field is plowed by the farmer', 'The field was plowed', 'The farmer was plowed', 'The field will plow'],
+          answer: 0,
+          explanation: 'In simple present, use is/am/are + V3: "The field is plowed by the farmer".'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-english'],
+      slug: 'reading-comprehension',
+      title: 'Reading Comprehension & Critical Thinking',
+      title_hi: 'अपठित गद्यांश एवं तार्किक सोच',
+      order_index: 4,
+      summary: 'Strategies to quickly read unseen passages, extract key vocabulary, and score full marks.',
+      summary_hi: 'अनदेखे पैराग्राफ को तेजी से पढ़ने, मुख्य भाव समझने और सटीक उत्तर देने की तकनीक।',
+      content: `### How to Tackle Unseen Passages:
+1. **Skim first:** Read the passage rapidly to grasp the general topic.
+2. **Read questions carefully:** Identify keywords in the questions before re-reading.
+3. **Locate evidence:** Find sentences in the text that support your answer.
+4. **Answer in your own words:** Avoid copying long entire sentences verbatim.`,
+      content_hi: `### अपठित गद्यांश हल करने के नियम:
+1. पहले पूरा गद्यांश सरसरी नजर से पढ़ें।
+2. प्रश्नों को ध्यान से देखें और मुख्य शब्द पहचानें।
+3. गद्यांश में से सटीक उत्तर रेखांकित करें।
+4. उत्तर सरल और स्पष्ट भाषा में लिखें।`,
+      examples: `Reading a health advisory leaflet or a newspaper article about rainwater harvesting.`,
+      examples_hi: `अखबार के लेख या जल संरक्षण पर छपे किसी विवरण को पढ़कर समझना।`,
+      key_points: JSON.stringify(['Skimming gives context; scanning finds specifics.', 'Context clues reveal word meanings.']),
+      key_points_hi: JSON.stringify(['संदर्भ से कठिन शब्दों का अर्थ समझें।', 'अपने शब्दों में सटीक उत्तर लिखें।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'What is the first step in solving a reading comprehension passage?',
+          options: ['Memorize every word', 'Skim quickly for the main theme', 'Write random answers', 'Skip reading'],
+          answer: 1,
+          explanation: 'Skimming gives you an immediate bird’s-eye view of what the text is about.'
+        }
+      ])
+    },
+
+    // Course 4: Social Science (3 lessons)
+    {
+      course_id: courseIds['class-10-social-science'],
+      slug: 'resources-and-development',
+      title: 'Resources and Sustainable Development',
+      title_hi: 'संसाधन एवं सतत पोषणीय विकास',
+      order_index: 1,
+      summary: 'Understand renewable and non-renewable natural resources, soil conservation, and forest stewardship.',
+      summary_hi: 'प्राकृतिक संसाधन, मिट्टी का संरक्षण, वन संपदा और सतत पोषणीय विकास की रणनीतियां।',
+      content: `### Classification of Resources
+- **On origin:** Biotic (living, e.g., forests, wildlife) & Abiotic (non-living, e.g., rocks, minerals).
+- **On exhaustibility:** Renewable (solar, wind, water) & Non-renewable (coal, petroleum).
+- **Sustainable Development:** Development that meets present needs without compromising the ability of future generations to meet their own needs.`,
+      content_hi: `### संसाधनों का वर्गीकरण
+- **उत्पत्ति के आधार पर:** जैव (वन, जीव-जंतु) और अजैव (खनिज, धातुएं)।
+- **समाप्यता के आधार पर:** नवीकरणीय (सौर ऊर्जा, पवन ऊर्जा) और अनवीकरणीय (कोयला, पेट्रोलियम)।
+- **सतत पोषणीय विकास:** ऐसा विकास जो पर्यावरण को नुकसान पहुंचाए बिना वर्तमान और भविष्य दोनों की जरूरतें पूरी करे।`,
+      examples: `Traditional tribal sacred groves (Jaherthan/Sarna) preserve biological biodiversity and perennial freshwater springs.`,
+      examples_hi: `झारखंड और मध्य भारत में सरना स्थल और पवित्र उपवन पीढ़ियों से वनों और जल स्रोतों की रक्षा करते आए हैं।`,
+      key_points: JSON.stringify(['Resources must be planned judiciously.', 'Soil erosion can be prevented by contour farming and afforestation.']),
+      key_points_hi: JSON.stringify(['संसाधनों का विवेकपूर्ण नियोजन अनिवार्य है।', 'सीढ़ीदार खेती और पेड़ लगाने से मिट्टी का कटाव रुकता है।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'Which of the following is a renewable resource?',
+          options: ['Coal', 'Petroleum', 'Solar Energy', 'Natural Gas'],
+          answer: 2,
+          explanation: 'Solar energy replenishes naturally every day and does not get depleted.'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-social-science'],
+      slug: 'nationalism-in-india',
+      title: 'Nationalism in India & Tribal Resistance Movements',
+      title_hi: 'भारत में राष्ट्रवाद एवं जनजातीय आंदोलन',
+      order_index: 2,
+      summary: 'The freedom struggle, Non-Cooperation movement, Civil Disobedience, and legendary leaders like Birsa Munda.',
+      summary_hi: 'स्वतंत्रता संग्राम, असहयोग आंदोलन, दांडी यात्रा और भगवान बिरसा मुंडा का उलगुलान।',
+      content: `### Awakening of Nationalism
+The shared experience of colonial oppression bonded different communities together in British India.
+
+#### Tribal & Peasant Movements:
+Tribal communities rose against forest laws that stripped their ancestral right to gather produce and graze cattle.
+- **Birsa Munda (Ulgulan movement):** Fought against British land exploitation and missionary interference in Chotanagpur.
+- **Alluri Sitarama Raju:** Led the Gudem Hills guerrilla uprising in Andhra Pradesh.`,
+      content_hi: `### राष्ट्रवाद का उदय
+अंग्रेजी शासन के शोषण के विरुद्ध देश के सभी वर्गों ने एकजुट होकर स्वतंत्रता की लड़ाई लड़ी।
+
+#### जनजातीय उलगुलान:
+जल, जंगल, जमीन के अधिकारों की रक्षा के लिए भगवान बिरसा मुंडा ने छोटानागपुर में विशाल जन-आंदोलन चलाया।`,
+      examples: `The Salt March (Dandi March) of 1930 demonstrated how a simple natural element like salt could unite people across India.`,
+      examples_hi: `1930 की दांडी यात्रा में नमक जैसी आम चीज ने पूरे देश के लोगों को एक सूत्र में बांध दिया।`,
+      key_points: JSON.stringify(['Birsa Munda fought for tribal land rights.', 'Non-violence and civil disobedience mobilized millions.']),
+      key_points_hi: JSON.stringify(['भगवान बिरसा मुंडा ने जनजातीय स्वाभिमान और जमीन की रक्षा की।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'The Ulgulan (Great Tumult) tribal movement was led by which revered leader?',
+          options: ['Bhagat Singh', 'Birsa Munda', 'Mangal Pandey', 'Subhas Chandra Bose'],
+          answer: 1,
+          explanation: 'Bhagwan Birsa Munda led the historic Ulgulan movement for tribal autonomy and rights.'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['class-10-social-science'],
+      slug: 'sectors-of-indian-economy',
+      title: 'Sectors of the Indian Economy',
+      title_hi: 'भारतीय अर्थव्यवस्था के क्षेत्रक',
+      order_index: 3,
+      summary: 'Primary (agriculture), Secondary (manufacturing), and Tertiary (services) sectors and rural employment.',
+      summary_hi: 'प्राथमिक (कृषि), द्वितीयक (उद्योग) और तृतीयक (सेवा) क्षेत्रक तथा ग्रामीण रोजगार के अवसर।',
+      content: `### Three Economic Sectors:
+1. **Primary Sector:** Activities directly exploiting natural resources (agriculture, dairy, fishing, forestry).
+2. **Secondary Sector:** Processing raw materials into finished goods (factories, weaving, construction).
+3. **Tertiary Sector:** Services that support production and daily living (transport, banking, education, healthcare, IT).`,
+      content_hi: `### अर्थव्यवस्था के तीन मुख्य क्षेत्रक:
+1. **प्राथमिक क्षेत्रक:** सीधे प्रकृति पर आधारित (खेती, पशुपालन, मछली पालन)।
+2. **द्वितीयक क्षेत्रक:** कच्चे माल से नई वस्तुएं बनाना (कारखाने, हथकरघा, निर्माण)।
+3. **तृतीयक क्षेत्रक:** सेवाएं प्रदान करना (परिवहन, बैंकिंग, शिक्षा, मोबाइल इंटरनेट)।`,
+      examples: `A farmer grows sugarcane (Primary) -> A mill turns it into jaggery/sugar (Secondary) -> A truck transports it to city shops and banks handle payment (Tertiary).`,
+      examples_hi: `किसान गन्ना उगाता है (प्राथमिक) -> गुड़ या चीनी बनती है (द्वितीयक) -> ट्रक उसे बाजार पहुंचाता है (तृतीयक)।`,
+      key_points: JSON.stringify(['Most rural workers are in the primary sector.', 'Tertiary sector contributes the highest share to GDP.']),
+      key_points_hi: JSON.stringify(['ग्रामीण भारत में अधिकांश लोग प्राथमिक क्षेत्र में कार्यरत हैं।', 'सेवा क्षेत्र देश की जीडीपी में सबसे बड़ा योगदान देता है।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'Which sector does dairy farming belong to?',
+          options: ['Primary', 'Secondary', 'Tertiary', 'Quaternary'],
+          answer: 0,
+          explanation: 'Dairy farming directly utilizes biological animal resources, making it part of the Primary sector.'
+        }
+      ])
+    },
+
+    // Course 5: Computer Science (3 lessons)
+    {
+      course_id: courseIds['digital-literacy-cs'],
+      slug: 'computer-fundamentals',
+      title: 'Hardware, Software and Operating Systems',
+      title_hi: 'कंप्यूटर के मूल अंग: हार्डवेयर, सॉफ्टवेयर एवं ओएस',
+      order_index: 1,
+      summary: 'Understand CPU, RAM, storage, input/output devices, and how an operating system coordinates hardware.',
+      summary_hi: 'सीपीयू, रैम, मेमोरी, कीबोर्ड-माउस और ऑपरेटिंग सिस्टम की कार्यप्रणाली को सरल रूप में समझें।',
+      content: `### Anatomy of a Computer:
+- **Input Devices:** Keyboard, mouse, microphone, camera.
+- **CPU (Central Processing Unit):** The "brain" executing instructions and performing math.
+- **RAM (Random Access Memory):** Super-fast temporary workspace for apps currently in use.
+- **Storage (SSD/Hard Drive):** Permanent storage for files, photos, and apps even when powered off.
+- **Output Devices:** Monitor/screen, speakers, printer.`,
+      content_hi: `### कंप्यूटर के मुख्य अंग:
+- **इनपुट उपकरण:** कीबोर्ड, माउस, माइक (जानकारी अंदर भेजने के लिए)।
+- **CPU:** कंप्यूटर का दिमाग जो सभी गणनाएं और आदेश पूरे करता है।
+- **RAM:** अस्थायी तेज मेमोरी, जहां चालू ऐप काम करते हैं।
+- **स्टोरेज (हार्ड डिस्क/मेमोरी कार्ड):** स्थायी रूप से फाइलें सहेजने की जगह।
+- **आउटपुट उपकरण:** स्क्रीन, स्पीकर, प्रिंटर।`,
+      examples: `Think of CPU as a chef, RAM as the kitchen countertop where ingredients are placed while cooking, and Storage as the pantry cupboard.`,
+      examples_hi: `CPU को रसोईया समझें, RAM वह मेज है जिस पर खाना बनाते समय सामान रखा जाता है, और स्टोरेज वह अलमारी है जहाँ सारा अनाज सुरक्षित रहता है।`,
+      key_points: JSON.stringify(['CPU executes commands; RAM provides workspace.', 'Storage holds data permanently.']),
+      key_points_hi: JSON.stringify(['CPU गणना करता है, RAM तात्कालिक काम संभालती है और स्टोरेज में डेटा सुरक्षित रहता है।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'Which component acts as the primary "brain" of a computer?',
+          options: ['RAM', 'CPU', 'Hard Disk', 'Monitor'],
+          answer: 1,
+          explanation: 'The CPU (Central Processing Unit) processes all calculations and program instructions.'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['digital-literacy-cs'],
+      slug: 'internet-and-web-browsing',
+      title: 'The Internet, Search Engines & Useful Digital Services',
+      title_hi: 'इंटरनेट, सर्च इंजन एवं सरकारी डिजिटल सेवाएं',
+      order_index: 2,
+      summary: 'How the internet works, using search effectively, and accessing DigiLocker, Aadhaar, and scholarship portals.',
+      summary_hi: 'इंटरनेट की दुनिया, सटीक सर्च के तरीके और डिजिलॉकर, आधार तथा छात्रवृत्ति पोर्टल का उपयोग।',
+      content: `### How the Web Works
+The Internet is a global network of interconnected computers communicating via standardized protocols (like HTTP/HTTPS).
+- **URL (Uniform Resource Locator):** Web address (e.g., *scholarships.gov.in*).
+- **HTTPS:** The 'S' stands for Secure; all data between your phone and website is encrypted.
+- **DigiLocker:** Official Indian digital locker to store board marksheets, caste certificates, and driving licenses safely online.`,
+      content_hi: `### इंटरनेट कैसे काम करता है?
+इंटरनेट दुनिया भर के कंप्यूटरों और मोबाइल फोन का आपस में जुड़ा विशाल जाल है।
+- **URL:** वेबसाइट का पता।
+- **HTTPS:** सुरक्षित कनेक्शन का संकेत।
+- **डिजीलॉकर (DigiLocker):** भारत सरकार की आधिकारिक सेवा जहाँ 10वीं की मार्कशीट, जाति प्रमाण पत्र सुरक्षित रहते हैं।`,
+      examples: `Instead of carrying original certificates to an exam center or office, a verified digital marksheet from DigiLocker is legally valid everywhere.`,
+      examples_hi: `मूल मार्कशीट खोने के डर के बिना डिजिलॉकर से डिजिटल कॉपी दिखाना हर जगह कानूनी रूप से मान्य है।`,
+      key_points: JSON.stringify(['Always verify the padlock icon and HTTPS for online forms.', 'DigiLocker keeps essential documents safe.']),
+      key_points_hi: JSON.stringify(['ऑनलाइन फॉर्म भरते समय हमेशा सुरक्षित वेबसाइट (HTTPS) देखें।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'What does the "S" in HTTPS indicate?',
+          options: ['Speed', 'Secure', 'Server', 'Simple'],
+          answer: 1,
+          explanation: 'The S stands for Secure, meaning the communication is encrypted against eavesdropping.'
+        }
+      ])
+    },
+    {
+      course_id: courseIds['digital-literacy-cs'],
+      slug: 'introduction-to-coding',
+      title: 'Introduction to Algorithms, Logic & Coding',
+      title_hi: 'कोडिंग का परिचय: तर्क और एल्गोरिदम',
+      order_index: 3,
+      summary: 'Think like a software engineer: sequencing, conditionals (If-Else), loops, and problem solving.',
+      summary_hi: 'सॉफ्टवेयर इंजीनियर की तरह सोचें: क्रम, शर्तें (यदि-तो), लूप और समस्याओं का तार्किक समाधान।',
+      content: `### What is an Algorithm?
+An algorithm is a step-by-step set of clear instructions to solve a particular problem or accomplish a task.
+
+#### Core Coding Concepts:
+1. **Sequence:** Doing steps one after another in exact order.
+2. **Conditionals (If-Else):** Making decisions. *(IF it rains, take an umbrella, ELSE wear a hat.)*
+3. **Loops (Repetition):** Repeating an action until a condition is met. *(WHILE bucket is not full, keep adding water.)*
+4. **Variables:** Named containers that store values (like score = 100).`,
+      content_hi: `### एल्गोरिदम क्या है?
+किसी भी समस्या को हल करने के लिए क्रमबद्ध दिए गए निर्देशों को एल्गोरिदम कहते हैं।
+
+#### कोडिंग के मूल स्तंभ:
+1. **क्रम (Sequence):** एक के बाद एक चरण पूरा करना।
+2. **शर्त (Condition - If/Else):** यदि ऐसा हो तो यह करो, वरना दूसरा काम करो।
+3. **लूप (Loop):** किसी काम को बार-बार दोहराना जब तक लक्ष्य पूरा न हो जाए।
+4. **वेरिएबल:** मान सहेजने का डिब्बा।`,
+      examples: `A recipe for making chai (tea) is a perfect real-life algorithm with steps, conditions (how much sugar?), and loops (boil for 2 minutes).`,
+      examples_hi: `चाय बनाने की विधि एक वास्तविक जीवन का एल्गोरिदम है जिसमें सही क्रम, शर्तें और समय शामिल होता है।`,
+      key_points: JSON.stringify(['Algorithms break big problems into small actionable steps.', 'Code is just human logic written in languages computers understand.']),
+      key_points_hi: JSON.stringify(['एल्गोरिदम बड़ी समस्याओं को छोटे चरणों में तोड़ता है।', 'कोडिंग कंप्यूटर से अपनी भाषा में बात करने का माध्यम है।']),
+      quiz_data: JSON.stringify([
+        {
+          question: 'What programming concept repeats a set of steps until a condition is met?',
+          options: ['Variable', 'Loop', 'Comment', 'Constant'],
+          answer: 1,
+          explanation: 'A loop executes code repeatedly until its termination condition is satisfied.'
+        }
+      ])
+    }
+  ];
+
+  for (const l of lessons) {
+    db.run(
+      `INSERT INTO lessons (course_id, slug, title, title_hi, order_index, summary, summary_hi, content, content_hi, examples, examples_hi, key_points, key_points_hi, quiz_data)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [l.course_id, l.slug, l.title, l.title_hi, l.order_index, l.summary, l.summary_hi, l.content, l.content_hi, l.examples, l.examples_hi, l.key_points, l.key_points_hi, l.quiz_data]
+    );
+  }
+  console.log(`✓ 20 Lessons seeded across 5 courses`);
+
+  // 4. Seed Scholarships (8 realistic government & foundation scholarships)
+  const scholarships = [
+    {
+      name: 'Pre-Matric Scholarship for ST Students',
+      name_hi: 'अनुसूचित जनजाति (ST) के छात्रों के लिए प्री-मैट्रिक छात्रवृत्ति',
+      provider: 'Ministry of Tribal Affairs, Govt. of India',
+      education_level: 'Class 9-10',
+      category: 'ST',
+      state: 'All India',
+      gender: 'All',
+      max_income: 250000,
+      min_percentage: 50.0,
+      disability_status: 'No',
+      benefit_amount: '₹3,500/year + Maintenance Allowance',
+      deadline: '31 October 2026',
+      description: 'Supports tribal students in secondary classes to reduce dropouts in rural and forested regions.',
+      description_hi: 'माध्यमिक कक्षाओं में ड्रॉपआउट कम करने और दूरदराज के क्षेत्रों के जनजातीय छात्रों की पढ़ाई जारी रखने के लिए।',
+      required_documents: JSON.stringify(['ST Caste Certificate', 'Income Certificate', 'Previous Year Marksheet', 'Aadhaar Card', 'Bank Passbook']),
+      official_portal: 'https://scholarships.gov.in'
+    },
+    {
+      name: 'Post-Matric Scholarship for SC Students',
+      name_hi: 'अनुसूचित जाति (SC) के छात्रों के लिए पोस्ट-मैट्रिक छात्रवृत्ति',
+      provider: 'Ministry of Social Justice and Empowerment',
+      education_level: 'Class 11-12 & Higher',
+      category: 'SC',
+      state: 'All India',
+      gender: 'All',
+      max_income: 250000,
+      min_percentage: 50.0,
+      disability_status: 'No',
+      benefit_amount: 'Full Tuition Fee Reimbursement + Monthly Allowance',
+      deadline: '15 November 2026',
+      description: 'Provides financial assistance for higher secondary, polytechnic, degree, and professional education.',
+      description_hi: 'उच्चतर माध्यमिक, पॉलिटेक्निक और कॉलेज स्तर पर ट्यूशन फीस प्रतिपूर्ति और मासिक भत्ता प्रदान करता है।',
+      required_documents: JSON.stringify(['SC Caste Certificate', 'Income Certificate', 'Class 10 Marksheet', 'College Admission Proof', 'Bank Account']),
+      official_portal: 'https://scholarships.gov.in'
+    },
+    {
+      name: 'National Means-cum-Merit Scholarship Scheme (NMMSS)',
+      name_hi: 'राष्ट्रीय साधन-सह-योग्यता छात्रवृत्ति योजना (NMMSS)',
+      provider: 'Department of School Education & Literacy, MoE',
+      education_level: 'Class 9-12',
+      category: 'All',
+      state: 'All India',
+      gender: 'All',
+      max_income: 350000,
+      min_percentage: 55.0,
+      disability_status: 'No',
+      benefit_amount: '₹12,000 per annum (₹1,000/month)',
+      deadline: '30 November 2026',
+      description: 'Awarded to meritorious students from economically weaker sections to prevent dropout at class 8 stage.',
+      description_hi: 'कक्षा 8 के बाद आर्थिक तंगी के कारण पढ़ाई छोड़ने वाले मेधावी छात्रों को निरंतर 4 वर्षों तक सहायता।',
+      required_documents: JSON.stringify(['Income Certificate (< 3.5 Lakh)', 'Selection Test Admit/Score Card', 'Class 8 Marksheet', 'Aadhaar']),
+      official_portal: 'https://scholarships.gov.in'
+    },
+    {
+      name: 'AICTE Pragati Scholarship for Girl Students',
+      name_hi: 'बालिकाओं के लिए एआईसीटीई प्रगति छात्रवृत्ति',
+      provider: 'All India Council for Technical Education (AICTE)',
+      education_level: 'Polytechnic / Diploma / B.Tech',
+      category: 'All',
+      state: 'All India',
+      gender: 'Female',
+      max_income: 800000,
+      min_percentage: 60.0,
+      disability_status: 'No',
+      benefit_amount: '₹50,000 per annum for tuition & books',
+      deadline: '31 December 2026',
+      description: 'Empowers young women from rural and backward areas to pursue professional technical and engineering education.',
+      description_hi: 'तकनीकी और इंजीनियरिंग शिक्षा में बालिकाओं की भागीदारी बढ़ाने के लिए वार्षिक ₹50,000 की सहायता।',
+      required_documents: JSON.stringify(['Admission Letter in AICTE Approved Institute', 'Income Certificate', 'Class 10/12 Marksheet', 'Aadhaar Card']),
+      official_portal: 'https://www.aicte-india.org'
+    },
+    {
+      name: 'Begum Hazrat Mahal National Scholarship',
+      name_hi: 'बेगम हज़रत महल राष्ट्रीय छात्रवृत्ति',
+      provider: 'Maulana Azad Education Foundation, Minority Affairs',
+      education_level: 'Class 9-12',
+      category: 'Minority',
+      state: 'All India',
+      gender: 'Female',
+      max_income: 200000,
+      min_percentage: 50.0,
+      disability_status: 'No',
+      benefit_amount: '₹5,000 to ₹6,000 per year',
+      deadline: '15 October 2026',
+      description: 'Direct benefit transfer for meritorious girl students belonging to notified minority communities.',
+      description_hi: 'अल्पसंख्यक समुदाय की मेधावी छात्राओं के लिए सीधी छात्रवृत्ति सहायता।',
+      required_documents: JSON.stringify(['Self-declared Minority Certificate', 'Income Certificate', 'Previous Marksheet', 'School Verification']),
+      official_portal: 'https://scholarships.gov.in'
+    },
+    {
+      name: 'Jharkhand E-Kalyan Post-Matric Welfare Scholarship',
+      name_hi: 'झारखंड ई-कल्याण पोस्ट-मैट्रिक कल्याण छात्रवृत्ति',
+      provider: 'Scheduled Tribe, Scheduled Caste, Minority and Backward Class Welfare Dept, Jharkhand',
+      education_level: 'Class 11-12 & Higher',
+      category: 'ST',
+      state: 'Jharkhand',
+      gender: 'All',
+      max_income: 250000,
+      min_percentage: 45.0,
+      disability_status: 'No',
+      benefit_amount: 'Complete Course Fee + Hosteller/Day Scholar Maintenance',
+      deadline: '20 November 2026',
+      description: 'Special welfare scheme for SC/ST/OBC students of Jharkhand pursuing post-matric studies in and outside the state.',
+      description_hi: 'झारखंड के अनुसूचित जाति, जनजाति एवं पिछड़ा वर्ग के विद्यार्थियों के लिए विशेष राज्य स्तरीय छात्रवृत्ति।',
+      required_documents: JSON.stringify(['Jharkhand Residential Certificate', 'Caste Certificate', 'Income Certificate', 'College Bonafide', 'Bank Passbook']),
+      official_portal: 'https://ekalyan.cgg.gov.in'
+    },
+    {
+      name: 'Scholarship for Students with Disabilities (Divyangjan)',
+      name_hi: 'दिव्यांग विद्यार्थियों के लिए राष्ट्रीय छात्रवृत्ति योजना',
+      provider: 'Department of Empowerment of Persons with Disabilities',
+      education_level: 'Class 9-12 & Higher',
+      category: 'All',
+      state: 'All India',
+      gender: 'All',
+      max_income: 250000,
+      min_percentage: 40.0,
+      disability_status: 'Yes',
+      benefit_amount: '₹4,000/year + Book Grant + Assistive Device allowance',
+      deadline: '30 October 2026',
+      description: 'Financial support and assistive device allowances for students with over 40% benchmark disability.',
+      description_hi: '40% या अधिक दिव्यांगता वाले छात्रों को शिक्षा उपकरण, पुस्तक अनुदान और भत्ते सहित सहायता।',
+      required_documents: JSON.stringify(['UDID Card / Disability Certificate', 'Income Certificate', 'Marksheet', 'Aadhaar Card']),
+      official_portal: 'https://scholarships.gov.in'
+    },
+    {
+      name: 'Tata Steel Millennium Tribal STEM Scholarship',
+      name_hi: 'टाटा स्टील मिलेनियम ट्राइबल एसटीईएम छात्रवृत्ति',
+      provider: 'Tata Steel Corporate Foundation',
+      education_level: 'Class 11-12 & Higher',
+      category: 'ST',
+      state: 'Jharkhand',
+      gender: 'All',
+      max_income: 400000,
+      min_percentage: 60.0,
+      disability_status: 'No',
+      benefit_amount: '₹30,000 per year towards tuition and study equipment',
+      deadline: '10 December 2026',
+      description: 'Private foundation fellowship encouraging tribal youth in mining and rural belts to excel in Science & Tech careers.',
+      description_hi: 'ग्रामीण और खनन क्षेत्रों के जनजातीय युवाओं को विज्ञान और इंजीनियरिंग में आगे बढ़ाने के लिए वार्षिक छात्रवृत्ति।',
+      required_documents: JSON.stringify(['ST Certificate', 'Domicile Proof (Jharkhand/Odisha)', 'Academic Transcripts', 'Recommendation from School Head']),
+      official_portal: 'https://tatasteelfoundation.org'
+    }
+  ];
+
+  for (const s of scholarships) {
+    db.run(
+      `INSERT INTO scholarships (name, name_hi, provider, education_level, category, state, gender, max_income, min_percentage, disability_status, benefit_amount, deadline, description, description_hi, required_documents, official_portal)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [s.name, s.name_hi, s.provider, s.education_level, s.category, s.state, s.gender, s.max_income, s.min_percentage, s.disability_status, s.benefit_amount, s.deadline, s.description, s.description_hi, s.required_documents, s.official_portal]
+    );
+  }
+  console.log(`✓ 8 Realistic scholarships seeded`);
+
+  // 5. Seed Mentors (6 mentors with diverse expertise)
+  const mentors = [
+    {
+      name: 'Ankit Sharma',
+      field: 'Computer Science & Software Engineering',
+      field_hi: 'कंप्यूटर विज्ञान एवं सॉफ्टवेयर इंजीनियरिंग',
+      experience_years: 6,
+      languages: 'Hindi + English',
+      availability: 'Weekends (10 AM - 1 PM)',
+      rating: 4.9,
+      bio: 'Former rural student from Bihar, now a Software Engineer at a leading tech company. Passionate about teaching coding from scratch and breaking tech career myths.',
+      avatar_initials: 'AS',
+      avatar_bg: '#2563EB'
+    },
+    {
+      name: 'Dr. Sunita Soren',
+      field: 'Medical Sciences & Rural Public Health',
+      field_hi: 'चिकित्सा विज्ञान एवं ग्रामीण स्वास्थ्य',
+      experience_years: 8,
+      languages: 'Santhali + Hindi + English',
+      availability: 'Tue & Thu Evenings (6 PM - 8 PM)',
+      rating: 5.0,
+      bio: 'Tribal doctor practicing in community health centers. Guides students on preparing for NEET, nursing, paramedical diplomas, and community healthcare careers.',
+      avatar_initials: 'SS',
+      avatar_bg: '#059669'
+    },
+    {
+      name: 'Rajesh Murmu',
+      field: 'Civil Services & Government Administration',
+      field_hi: 'प्रशासनिक सेवाएं एवं सरकारी प्रतियोगी परीक्षाएं',
+      experience_years: 10,
+      languages: 'Hindi + English + Ho',
+      availability: 'Sunday Mornings (9 AM - 12 PM)',
+      rating: 4.8,
+      bio: 'Senior State Administrative Officer. Mentors underprivileged youth on UPSC, JPSC/BPSC exams, essay writing, and public service opportunities.',
+      avatar_initials: 'RM',
+      avatar_bg: '#D97706'
+    },
+    {
+      name: 'Priya Patel',
+      field: 'Data Science & Applied Mathematics',
+      field_hi: 'डेटा साइंस एवं व्यावहारिक गणित',
+      experience_years: 5,
+      languages: 'Hindi + English + Gujarati',
+      availability: 'Mon & Wed Evenings (7 PM - 9 PM)',
+      rating: 4.9,
+      bio: 'Math olympiad mentor and data scientist. Specializes in helping students overcome math anxiety through relatable patterns and games.',
+      avatar_initials: 'PP',
+      avatar_bg: '#7C3AED'
+    },
+    {
+      name: 'Amit Verma',
+      field: 'Agritech & Sustainable Horticulture',
+      field_hi: 'कृषि तकनीक एवं सतत जैविक खेती',
+      experience_years: 7,
+      languages: 'Hindi + English',
+      availability: 'Flexible (Afternoons)',
+      rating: 4.7,
+      bio: 'Agricultural scientist researching drone tech and soil health. Guides students on ICAR entrance, B.Sc Agriculture, and modern agribusiness ventures.',
+      avatar_initials: 'AV',
+      avatar_bg: '#16A34A'
+    },
+    {
+      name: 'Kavita Rao',
+      field: 'Digital Literacy & English Communication',
+      field_hi: 'डिजिटल साक्षरता एवं अंग्रेज़ी संचार',
+      experience_years: 9,
+      languages: 'Telugu + Hindi + English',
+      availability: 'Saturdays (3 PM - 6 PM)',
+      rating: 4.9,
+      bio: 'Educator who has trained over 4,000 village youth in functional spoken English, interview preparation, and digital workplace readiness.',
+      avatar_initials: 'KR',
+      avatar_bg: '#DB2777'
+    }
+  ];
+
+  for (const m of mentors) {
+    db.run(
+      `INSERT INTO mentors (name, field, field_hi, experience_years, languages, availability, rating, bio, avatar_initials, avatar_bg)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [m.name, m.field, m.field_hi, m.experience_years, m.languages, m.availability, m.rating, m.bio, m.avatar_initials, m.avatar_bg]
+    );
+  }
+  console.log(`✓ 6 Diverse mentors seeded`);
+
+  // 6. Seed Sample Progress for Demo Student Rahul
+  // Mark 2 science lessons completed, 3 math lessons completed, 2 english lessons completed
+  const sampleLessons = db.query(`SELECT id, course_id FROM lessons ORDER BY id ASC LIMIT 8`);
+  for (let i = 0; i < sampleLessons.length; i++) {
+    const l = sampleLessons[i];
+    const completed = i < 5 ? 1 : 0;
+    const score = i < 5 ? 100 : 0;
+    db.run(
+      `INSERT INTO progress (user_id, lesson_id, completed, quiz_score) VALUES (?, ?, ?, ?)`,
+      [demoUserId, l.id, completed, score]
+    );
+  }
+  console.log(`✓ Sample student progress seeded for Rahul`);
+
+  console.log('🎉 EduSaarthi database successfully seeded!');
+}
+
+seed().catch(err => {
+  console.error('Failed to seed database:', err);
+  process.exit(1);
+});

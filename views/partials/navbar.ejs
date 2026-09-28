@@ -1,0 +1,88 @@
+<!-- Persistent Top Status Bar -->
+<div class="top-status-bar" role="region" aria-label="System Connectivity and Preferences">
+  <div class="container top-status-inner">
+    <div class="status-left">
+      <span class="status-badge" id="lang-status-pill">
+        🌐 <%= (lang === 'hi') ? 'हिन्दी (Hindi)' : 'English' %>
+      </span>
+      <span class="status-badge <%= (typeof lowData !== 'undefined' && lowData) ? 'low-data-active' : '' %>" id="low-data-status-pill">
+        📶 <%= (typeof lowData !== 'undefined' && lowData) ? 'Low Data: ON' : 'Normal Data' %>
+      </span>
+    </div>
+    <div class="status-right">
+      <span class="status-badge online" id="network-status-pill">
+        ✓ Online
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Offline Notification Banner -->
+<div class="offline-banner" id="offline-banner" role="alert">
+  ⚠️ <%= (lang === 'hi') ? 'आप ऑफ़लाइन हैं। आपके द्वारा डाउनलोड किए गए पाठ बिना इंटरनेट के भी उपलब्ध हैं।' : "You're offline. Downloaded lessons are still available." %>
+</div>
+
+<!-- Main Global Navigation Bar -->
+<header class="navbar" role="banner">
+  <div class="container navbar-inner">
+    <!-- Brand Logo -->
+    <a href="<%= user ? '/dashboard' : '/' %>" class="brand" aria-label="EduSaarthi Home">
+      <div class="brand-icon" aria-hidden="true">ES</div>
+      <div class="brand-text">
+        <span class="brand-title">EduSaarthi</span>
+        <span class="brand-tagline"><%= (lang === 'hi') ? 'बाधाओं से मुक्त शिक्षा' : 'Learning Without Barriers' %></span>
+      </div>
+    </a>
+
+    <!-- Navigation Links -->
+    <nav aria-label="Main Navigation">
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'home') ? 'active' : '' %>"><%= (lang === 'hi') ? 'होम' : 'Home' %></a></li>
+        <% if (user) { %>
+          <li><a href="/dashboard" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'dashboard') ? 'active' : '' %>"><%= (lang === 'hi') ? 'डैशबोर्ड' : 'Dashboard' %></a></li>
+        <% } %>
+        <li><a href="/learn" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'learn') ? 'active' : '' %>"><%= (lang === 'hi') ? 'पढ़ाई (पाठ)' : 'Learn' %></a></li>
+        <li><a href="/tutor" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'tutor') ? 'active' : '' %>">🤖 <%= (lang === 'hi') ? 'एआई ट्यूटर' : 'AI Tutor' %></a></li>
+        <li><a href="/scholarships" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'scholarships') ? 'active' : '' %>">🎓 <%= (lang === 'hi') ? 'छात्रवृत्तियां' : 'Scholarships' %></a></li>
+        <li><a href="/career" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'career') ? 'active' : '' %>">🧭 <%= (lang === 'hi') ? 'करियर' : 'Career' %></a></li>
+        <li><a href="/mentors" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'mentors') ? 'active' : '' %>">👨‍🏫 <%= (lang === 'hi') ? 'मेंटर' : 'Mentors' %></a></li>
+      </ul>
+    </nav>
+
+    <!-- Controls (Language, Low Data, User Profile) -->
+    <div class="nav-controls">
+      <!-- Low Data Mode Toggle -->
+      <button type="button" class="toggle-control <%= (typeof lowData !== 'undefined' && lowData) ? 'active' : '' %>" id="low-data-toggle" aria-pressed="<%= (typeof lowData !== 'undefined' && lowData) ? 'true' : 'false' %>" title="Reduces heavy images and animations">
+        <span>📶</span>
+        <span class="toggle-text"><%= (typeof lowData !== 'undefined' && lowData) ? 'Low Data: ON' : 'Low Data' %></span>
+      </button>
+
+      <!-- Language Toggle Button -->
+      <button type="button" class="lang-btn" id="lang-toggle-btn" data-current-lang="<%= lang || 'hi' %>" title="Switch Language">
+        <span>🌐</span>
+        <span><%= (lang === 'hi') ? 'English' : 'हिन्दी' %></span>
+      </button>
+
+      <!-- User Authentication State -->
+      <% if (user) { %>
+        <div class="user-chip" title="<%= user.email %>">
+          <div class="user-avatar-mini"><%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %></div>
+          <span class="user-name-short"><%= user.name ? user.name.split(' ')[0] : 'Student' %></span>
+          <a href="/auth/logout" class="btn btn-sm btn-secondary" style="padding: 0.2rem 0.5rem; margin-left: 0.25rem;" title="Logout">✕</a>
+        </div>
+      <% } else { %>
+        <a href="/auth/login" class="btn btn-sm btn-outline-primary"><%= (lang === 'hi') ? 'लॉग इन' : 'Login' %></a>
+        <a href="/auth/register" class="btn btn-sm btn-primary"><%= (lang === 'hi') ? 'शुरू करें' : 'Register' %></a>
+      <% } %>
+
+      <!-- Mobile Hamburger Button -->
+      <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Toggle navigation menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>

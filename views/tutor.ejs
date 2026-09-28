@@ -1,0 +1,250 @@
+<%- include('partials/header', { pageTitle: (lang === 'hi') ? 'एआई ट्यूटर' : 'AI Tutor' }) %>
+<%- include('partials/navbar', { activeTab: 'tutor' }) %>
+
+<main class="container" style="padding-top: 1rem; padding-bottom: 2rem;">
+  <div class="tutor-container">
+    <!-- Chat Header -->
+    <div class="tutor-header">
+      <div class="tutor-info">
+        <h3>
+          <span style="font-size: 1.4rem;">🤖</span>
+          <span>EduSaarthi AI Tutor</span>
+          <span class="badge badge-success" style="font-size: 0.7rem; margin-left: 0.5rem;">Adaptive 2.0</span>
+        </h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">
+          <%= (lang === 'hi') ? 'प्रश्न पूछें। अवधारणाओं को समझें। अपनी गति से सीखें।' : 'Ask questions. Understand concepts. Learn at your pace.' %>
+        </p>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span class="badge badge-slate" id="chat-lang-indicator">
+          <%= (lang === 'hi') ? 'हिन्दी मोड' : 'English Mode' %>
+        </span>
+      </div>
+    </div>
+
+    <!-- Chat Messages Scroll Area -->
+    <div class="chat-messages" id="chat-messages" role="log" aria-live="polite">
+      <!-- Welcome Message from AI -->
+      <div class="chat-bubble ai">
+        <div class="msg-header">
+          <strong>EduSaarthi AI</strong>
+          <button type="button" class="read-aloud-btn" onclick="readBubbleText(this)">
+            🔊 <%= (lang === 'hi') ? 'सुनाएँ' : 'Read Aloud' %>
+          </button>
+        </div>
+        <div class="bubble-text">
+          <% if (lang === 'hi') { %>
+            नमस्ते! 👋 मैं आपका एडू-सारथी एआई ट्यूटर हूँ। विज्ञान, गणित, अंग्रेज़ी या किसी भी विषय में जो बात समझ न आई हो, बेझिझक पूछें। आप बोलकर (माइक) या लिखकर सवाल कर सकते हैं।
+          <% } else { %>
+            Hello! 👋 I am your EduSaarthi AI Tutor. Ask me any concept in Science, Math, English, or Social Studies. You can type or use the microphone button to ask questions in your own words.
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suggested Question Chips -->
+    <div class="prompt-chips-wrap">
+      <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); align-self: center; margin-right: 0.25rem;">
+        <%= (lang === 'hi') ? 'सुझाए गए प्रश्न:' : 'Suggested:' %>
+      </span>
+
+      <button type="button" class="chip-btn" data-query="<%= (lang === 'hi') ? 'प्रकाश संश्लेषण क्या है? इसे आसान भाषा में समझाओ।' : 'Explain photosynthesis simply' %>">
+        🌿 <%= (lang === 'hi') ? 'प्रकाश संश्लेषण क्या है?' : 'Explain photosynthesis simply' %>
+      </button>
+
+      <button type="button" class="chip-btn" data-query="<%= (lang === 'hi') ? 'आकाश का रंग नीला क्यों दिखाई देता है?' : 'Why is the sky blue?' %>">
+        🌤️ <%= (lang === 'hi') ? 'आकाश नीला क्यों है?' : 'Why is the sky blue?' %>
+      </button>
+
+      <button type="button" class="chip-btn" data-query="<%= (lang === 'hi') ? 'न्यूटन का तीसरा गति नियम क्या है?' : 'Explain Newton\'s third law' %>">
+        🍎 <%= (lang === 'hi') ? 'न्यूटन का तीसरा नियम' : 'Newton\'s third law' %>
+      </button>
+
+      <button type="button" class="chip-btn" data-query="<%= (lang === 'hi') ? 'गणित के कठिन प्रश्न हल करने का तरीका समझाओ' : 'Help me solve this math problem' %>">
+        📐 <%= (lang === 'hi') ? 'गणित का सवाल कैसे हल करें?' : 'Help me solve math problem' %>
+      </button>
+    </div>
+
+    <!-- Chat Input Form -->
+    <form id="chat-form" class="chat-input-bar">
+      <button type="button" id="voice-mic-btn" class="mic-btn" title="Speak question using microphone" aria-label="Microphone">
+        🎤
+      </button>
+
+      <input 
+        type="text" 
+        id="chat-input" 
+        placeholder="<%= (lang === 'hi') ? 'अपना सवाल यहाँ लिखें या माइक से बोलें...' : 'Ask your question...' %>" 
+        required 
+        autocomplete="off"
+      >
+
+      <button type="submit" id="chat-send-btn" class="btn btn-primary" style="padding: 0.75rem 1.4rem;">
+        <span><%= (lang === 'hi') ? 'भेजें' : 'Send' %></span>
+        <span>➤</span>
+      </button>
+    </form>
+  </div>
+</main>
+
+<script src="/js/voice.js"></script>
+<script>
+  // Simple markdown renderer for AI responses
+  function renderMarkdownText(text) {
+    if (!text) return '';
+    return text
+      .replace(/^### (.*$)/gim, '<h4 style="font-weight: 700; color: var(--primary); margin: 0.6rem 0 0.3rem;">$1</h4>')
+      .replace(/^#### (.*$)/gim, '<h5 style="font-weight: 700; color: #0F172A; margin: 0.5rem 0 0.2rem;">$1</h5>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>');
+  }
+
+  // Read Aloud Handler
+  function readBubbleText(btn) {
+    const parentBubble = btn.closest('.chat-bubble');
+    if (!parentBubble) return;
+    const textElement = parentBubble.querySelector('.bubble-text');
+    if (textElement && window.EduVoice) {
+      window.EduVoice.speak(textElement.innerText, '<%= lang || "hi" %>');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatMessages = document.getElementById('chat-messages');
+    const micBtn = document.getElementById('voice-mic-btn');
+    const chatSendBtn = document.getElementById('chat-send-btn');
+    const messageHistory = [];
+
+    // Scroll to bottom helper
+    function scrollToBottom() {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Append message to chat
+    function appendMessage(sender, text, isAi = false) {
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${sender}`;
+
+      if (isAi) {
+        bubble.innerHTML = `
+          <div class="msg-header">
+            <strong>EduSaarthi AI</strong>
+            <button type="button" class="read-aloud-btn" onclick="readBubbleText(this)">
+              🔊 <%= (lang === 'hi') ? 'सुनाएँ' : 'Read Aloud' %>
+            </button>
+          </div>
+          <div class="bubble-text">${renderMarkdownText(text)}</div>
+        `;
+      } else {
+        bubble.innerHTML = `
+          <div class="msg-header">
+            <strong><%= (lang === 'hi') ? 'विद्यार्थी (आप)' : 'Student (You)' %></strong>
+          </div>
+          <div class="bubble-text">${text}</div>
+        `;
+      }
+
+      chatMessages.appendChild(bubble);
+      scrollToBottom();
+      messageHistory.push({ sender: sender === 'student' ? 'user' : 'model', text });
+    }
+
+    // Submit Chat Message
+    async function sendMessage(text) {
+      if (!text || !text.trim()) return;
+      const query = text.trim();
+      chatInput.value = '';
+
+      // Add user message
+      appendMessage('student', query, false);
+
+      // Loading bubble
+      const loadingBubble = document.createElement('div');
+      loadingBubble.className = 'chat-bubble ai';
+      loadingBubble.id = 'loading-bubble';
+      loadingBubble.innerHTML = `<span style="opacity: 0.7;">💭 <%= (lang === 'hi') ? 'सोच रहा हूँ...' : 'Thinking...' %></span>`;
+      chatMessages.appendChild(loadingBubble);
+      scrollToBottom();
+
+      chatSendBtn.disabled = true;
+
+      try {
+        const res = await fetch('/tutor/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: query,
+            language: '<%= lang || "hi" %>',
+            educationLevel: '<%= (user && user.education_level) ? user.education_level : "Class 10" %>',
+            history: messageHistory
+          })
+        });
+
+        const loadingElem = document.getElementById('loading-bubble');
+        if (loadingElem) loadingElem.remove();
+
+        if (res.ok) {
+          const data = await res.json();
+          appendMessage('ai', data.reply, true);
+        } else {
+          appendMessage('ai', '<%= (lang === "hi") ? "एआई ट्यूटर अस्थायी रूप से व्यस्त है। कृपया पुनः प्रयास करें।" : "AI Tutor is temporarily unavailable. Please try again." %>', true);
+        }
+      } catch (err) {
+        console.error('Chat error:', err);
+        const loadingElem = document.getElementById('loading-bubble');
+        if (loadingElem) loadingElem.remove();
+        appendMessage('ai', '<%= (lang === "hi") ? "नेटवर्क समस्या। यदि आप ऑफ़लाइन हैं, तो सहेजे गए विषयों के सामान्य प्रश्न अभी भी उपलब्ध हैं।" : "Network connectivity issue. Please check connection." %>', true);
+      } finally {
+        chatSendBtn.disabled = false;
+        chatInput.focus();
+      }
+    }
+
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      sendMessage(chatInput.value);
+    });
+
+    // Suggested Question Chips
+    document.querySelectorAll('.chip-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const query = btn.dataset.query;
+        if (query) {
+          sendMessage(query);
+        }
+      });
+    });
+
+    // Voice Microphone Interaction
+    if (micBtn && window.EduVoice) {
+      micBtn.addEventListener('click', () => {
+        window.EduVoice.toggleListening(
+          (spokenText, isFinal) => {
+            chatInput.value = spokenText;
+            if (isFinal) {
+              setTimeout(() => {
+                sendMessage(spokenText);
+              }, 400);
+            }
+          },
+          (listening) => {
+            if (listening) {
+              micBtn.classList.add('listening');
+            } else {
+              micBtn.classList.remove('listening');
+            }
+          }
+        );
+      });
+    }
+
+    // Auto-focus input
+    chatInput.focus();
+  });
+</script>
+
+<%- include('partials/footer') %>
