@@ -88,7 +88,7 @@ async function runTests() {
     if (res.statusCode !== 302) throw new Error(`Expected 302 redirect, got ${res.statusCode}`);
     const setCookie = res.headers['set-cookie'];
     if (!setCookie) throw new Error('Session cookie not set');
-    sessionCookie = setCookie[0].split(';')[0];
+    sessionCookie = setCookie.map(c => c.split(';')[0]).join('; ');
   });
 
   // 4. Authenticated Dashboard
@@ -282,6 +282,126 @@ async function runTests() {
     const res = await request('/service-worker.js');
     if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
     if (!res.body.includes('edusaarthi-core')) throw new Error('Cache name missing in Service Worker');
+  });
+
+  // 11. Quizzes & Tests System
+  await test('GET /quizzes returns 200 with Daily Challenge and subject quizzes', async () => {
+    const res = await request('/quizzes', { cookie: sessionCookie });
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    if (!res.body.includes('Daily Challenge') && !res.body.includes('दैनिक चुनौती')) {
+      throw new Error('Daily challenge missing in quizzes view');
+    }
+    if (!res.body.includes('Geography') && !res.body.includes('भूगोल')) {
+      throw new Error('Subject quizzes missing in quizzes view');
+    }
+  });
+
+  let newAttemptId = null;
+  await test('GET /quizzes/take/daily-challenge-geography returns 200 with timer and runner', async () => {
+    const res = await request('/quizzes/take/daily-challenge-geography', { cookie: sessionCookie });
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    if (!res.body.includes('quiz-timer-pill') || !res.body.includes('question-step')) {
+      throw new Error('Quiz runner elements missing');
+    }
+  });
+
+  await test('POST /quizzes/submit grades answers and saves attempt to SQLite DB', async () => {
+    const firstQuiz = db.get('SELECT id FROM quizzes ORDER BY id ASC LIMIT 1');
+    const res = await request('/quizzes/submit', {
+      method: 'POST',
+      cookie: sessionCookie,
+      body: {
+        quiz_id: firstQuiz.id,
+        answers: [0, 1, 2, 0, 1],
+        time_taken_seconds: 95
+      }
+    });
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    const data = JSON.parse(res.body);
+    if (!data.success || !data.attemptId || data.score === undefined) {
+      throw new Error('Quiz grading failed');
+    }
+    newAttemptId = data.attemptId;
+
+    // Verify DB persistence
+    const savedAttempt = db.get('SELECT * FROM quiz_attempts WHERE id = ?', [newAttemptId]);
+    if (!savedAttempt) throw new Error('Quiz attempt was not persisted to SQLite database');
+  });
+
+  await test('GET /quizzes/results/:attemptId returns 200 with score and explanations', async () => {
+    const res = await request(`/quizzes/results/${newAttemptId}`, { cookie: sessionCookie });
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    if (!res.body.includes('result-score-badge') || !res.body.includes('explanation-box')) {
+      throw new Error('Results card or answer explanation box missing');
+    }
+  });
+
+  // 12. Learning Progress Analytics
+  await test('GET /progress returns 200 with weekly study chart and milestones', async () => {
+    const res = await request('/progress', { cookie: sessionCookie });
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    if (!res.body.includes('bar-chart-container') || !res.body.includes('milestones-grid')) {
+      throw new Error('Progress chart or milestones missing');
+    }
+  });
+
+  // 13. Profile & Settings
+  await test('GET /profile returns 200 with student details', async () => {
+    const res = await request('/profile', { cookie: sessionCookie });
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    if (!res.body.includes('profile-avatar-box') || !res.body.includes('profileUser')) {
+      // Check for user info
+      if (!res.body.includes('Rahul') && !res.body.includes('राहुल')) {
+        throw new Error('Profile name missing');
+      }
+    }
+  });
+
+  await test('GET /profile/settings returns 200 with language, low-data, and theme controls', async () => {
+    const res = await request('/profile/settings', { cookie: sessionCookie });
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    if (!res.body.includes('settings-lang-select') || !res.body.includes('theme-picker-grid')) {
+      throw new Error('Settings controls missing');
+    }
+  });
+
+  // 14. CRITICAL LANGUAGE PERSISTENCE ACROSS TABS / PAGES
+  await test('Setting language sets persistent edusaarthi_language cookie and persists across tab navigation', async () => {
+    // Student sets language to Marathi ('mr')
+    const setLangRes = await request('/auth/set-language', {
+      method: 'POST',
+      body: { lang: 'mr' },
+      cookie: sessionCookie
+    });
+    if (setLangRes.statusCode !== 200) throw new Error(`Expected 200 for set-language, got ${setLangRes.statusCode}`);
+    
+    // Check that edusaarthi_language cookie was set
+    const setCookieHeaders = setLangRes.headers['set-cookie'] || [];
+    const hasLangCookie = setCookieHeaders.some(c => c.includes('edusaarthi_language=mr'));
+    if (!hasLangCookie) throw new Error('edusaarthi_language cookie was not set in response');
+
+    // Simulate switching tabs with the persistent language cookie
+    let tabCookie = sessionCookie.includes('edusaarthi_language=')
+      ? sessionCookie.replace(/edusaarthi_language=[^;]+/, 'edusaarthi_language=mr')
+      : `${sessionCookie}; edusaarthi_language=mr`;
+
+    // 1. Visit Dashboard tab
+    const dashRes = await request('/dashboard', { cookie: tabCookie });
+    if (!dashRes.body.includes('डॅशबोर्ड') && !dashRes.body.includes('अडथळ्यांशिवाय')) {
+      throw new Error('Language reset to English/Hindi on Dashboard tab');
+    }
+
+    // 2. Visit Quizzes tab
+    const quizRes = await request('/quizzes', { cookie: tabCookie });
+    if (!quizRes.body.includes('चाचण्या') && !quizRes.body.includes('डॅशबोर्ड') && !quizRes.body.includes('शिकणे')) {
+      throw new Error('Language reset on Quizzes tab');
+    }
+
+    // 3. Visit Progress tab
+    const progRes = await request('/progress', { cookie: tabCookie });
+    if (!progRes.body.includes('प्रगती') && !progRes.body.includes('डॅशबोर्ड')) {
+      throw new Error('Language reset on Progress tab');
+    }
   });
 
   console.log(`\n========================================`);

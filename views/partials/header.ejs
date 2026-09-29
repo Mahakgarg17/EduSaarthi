@@ -19,5 +19,37 @@
 
   <!-- Core Design System CSS -->
   <link rel="stylesheet" href="/css/main.css">
+
+  <!-- Early Language & Theme State Initialization (Prevents Flashing) -->
+  <script>
+    (function() {
+      try {
+        var savedLang = localStorage.getItem('edusaarthi_language');
+        var cookieMatch = document.cookie.match(/(?:^|;\s*)edusaarthi_language=([^;]*)/);
+        var cookieLang = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+        var docLang = document.documentElement.getAttribute('lang') || 'hi';
+
+        if (savedLang) {
+          if (cookieLang !== savedLang) {
+            document.cookie = "edusaarthi_language=" + encodeURIComponent(savedLang) + "; path=/; max-age=31536000; SameSite=Lax";
+          }
+          if (docLang !== savedLang) {
+            window.location.reload();
+          }
+        } else {
+          localStorage.setItem('edusaarthi_language', docLang);
+          if (!cookieLang) {
+            document.cookie = "edusaarthi_language=" + encodeURIComponent(docLang) + "; path=/; max-age=31536000; SameSite=Lax";
+          }
+        }
+
+        // Theme check
+        var savedTheme = localStorage.getItem('edusaarthi_theme');
+        if (savedTheme === 'dark' || savedTheme === 'high-contrast') {
+          document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body class="<%= (typeof lowData !== 'undefined' && lowData) ? 'low-data-mode' : '' %>">

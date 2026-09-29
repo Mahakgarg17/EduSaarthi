@@ -29,7 +29,33 @@ window.showToast = function (message, type = 'info') {
     toast.style.transform = 'translateY(10px)';
     toast.style.transition = 'all 0.3s ease';
     setTimeout(() => toast.remove(), 300);
-  }, 3500);
+// Centralized Persistent Language Manager
+window.EduSaarthiLanguage = {
+  get() {
+    return localStorage.getItem('edusaarthi_language') || document.documentElement.getAttribute('lang') || 'hi';
+  },
+  async set(lang) {
+    if (!lang) return;
+    localStorage.setItem('edusaarthi_language', lang);
+    document.cookie = 'edusaarthi_language=' + encodeURIComponent(lang) + '; path=/; max-age=31536000; SameSite=Lax';
+
+    try {
+      await fetch('/auth/set-language', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lang })
+      });
+    } catch (e) {
+      console.warn('Language server sync error:', e);
+    }
+
+    if (window.showToast) {
+      window.showToast('Language updated.', 'success');
+    }
+    setTimeout(() => {
+      window.location.reload();
+    }, 150);
+  }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -139,45 +165,77 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. Multilingual Language Selector Handler
   const langSelect = document.getElementById('lang-select');
   if (langSelect) {
-    langSelect.addEventListener('change', async () => {
-      const selectedLang = langSelect.value;
-      try {
-        const res = await fetch('/auth/set-language', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lang: selectedLang })
-        });
-        if (res.ok) {
-          const selectedText = langSelect.options[langSelect.selectedIndex].text;
-          showToast(`Language set to ${selectedText}`, 'success');
-          setTimeout(() => window.location.reload(), 250);
-        }
-      } catch (err) {
-        console.error('Failed to change language:', err);
-      }
+    const activeLang = window.EduSaarthiLanguage.get();
+    if (langSelect.value !== activeLang) {
+      langSelect.value = activeLang;
+    }
+    langSelect.addEventListener('change', () => {
+      window.EduSaarthiLanguage.set(langSelect.value);
     });
   }
 
   const langToggleBtn = document.getElementById('lang-toggle-btn');
   if (langToggleBtn) {
-    langToggleBtn.addEventListener('click', async () => {
-      const currentLang = langToggleBtn.dataset.currentLang || 'hi';
-      const newLang = currentLang === 'hi' ? 'en' : 'hi';
-      
-      try {
-        const res = await fetch('/auth/set-language', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lang: newLang })
-        });
-        if (res.ok) {
-          showToast(newLang === 'hi' ? 'भाषा बदलकर हिन्दी कर दी गई है।' : 'Language changed to English.', 'success');
-          setTimeout(() => window.location.reload(), 250);
+    langToggleBtn.addEventListener('click', () => {
+      const cur = window.EduSaarthiLanguage.get();
+      const next = cur === 'hi' ? 'en' : 'hi';
+      window.EduSaarthiLanguage.set(next);
+    });
+  }
+
+  // 5. Today's Interactive Goals Checklist Management
+  const goalItems = document.querySelectorAll('.goal-check-item');
+  if (goalItems.length > 0) {
+    const GOALS_STORAGE_KEY = 'edusaarthi_today_goals';
+    let savedGoals = {};
+    try {
+      savedGoals = JSON.parse(localStorage.getItem(GOALS_STORAGE_KEY) || '{}');
+    } catch (e) {
+      savedGoals = {};
+    }
+
+    function updateGoalStats() {
+      let completedCount = 0;
+      const totalCount = goalItems.length;
+
+      goalItems.forEach((item, index) => {
+        const checkbox = item.querySelector('.goal-checkbox');
+        const isDone = !!savedGoals['goal_' + index];
+        if (checkbox) checkbox.checked = isDone;
+        if (isDone) {
+          item.classList.add('completed');
+          completedCount++;
+        } else {
+          item.classList.remove('completed');
         }
-      } catch (err) {
-        console.error('Failed to change language:', err);
+      });
+
+      const countSpan = document.getElementById('goals-completed-counter');
+      if (countSpan) {
+        countSpan.textContent = `${completedCount}/${totalCount} completed`;
+      }
+      const progressBar = document.getElementById('goals-progress-fill');
+      if (progressBar) {
+        const pct = Math.round((completedCount / totalCount) * 100);
+        progressBar.style.width = pct + '%';
+      }
+    }
+
+    goalItems.forEach((item, index) => {
+      const checkbox = item.querySelector('.goal-checkbox');
+      if (checkbox) {
+        checkbox.addEventListener('change', () => {
+          savedGoals['goal_' + index] = checkbox.checked;
+          localStorage.setItem(GOALS_STORAGE_KEY, JSON.stringify(savedGoals));
+          updateGoalStats();
+          if (checkbox.checked) {
+            showToast('Goal marked complete! Great effort! 🎯', 'success');
+          }
+        });
       }
     });
+
+    updateGoalStats();
   }
 
   // 5. Interactive Mini-Quiz Checker

@@ -39,6 +39,7 @@ router.post('/login', async (req, res) => {
       preferred_language: user.preferred_language
     };
     req.session.lang = user.preferred_language || req.session.lang || 'hi';
+    res.cookie('edusaarthi_language', req.session.lang, { maxAge: 365 * 24 * 60 * 60 * 1000, httpOnly: false, sameSite: 'lax', path: '/' });
 
     return res.redirect('/dashboard');
   } catch (err) {
@@ -64,6 +65,7 @@ router.post('/demo-login', async (req, res) => {
       preferred_language: demoUser.preferred_language
     };
     req.session.lang = demoUser.preferred_language || 'hi';
+    res.cookie('edusaarthi_language', req.session.lang, { maxAge: 365 * 24 * 60 * 60 * 1000, httpOnly: false, sameSite: 'lax', path: '/' });
 
     return res.redirect('/dashboard');
   } catch (err) {
@@ -111,6 +113,13 @@ router.post('/register', async (req, res) => {
       preferred_language: preferred_language || 'hi'
     };
     req.session.lang = preferred_language || 'hi';
+    res.cookie('edusaarthi_language', req.session.lang, { maxAge: 365 * 24 * 60 * 60 * 1000, httpOnly: false, sameSite: 'lax', path: '/' });
+
+    // Initialize user_settings
+    db.run(
+      `INSERT OR REPLACE INTO user_settings (user_id, preferred_language) VALUES (?, ?)`,
+      [result.lastInsertRowid, req.session.lang]
+    );
 
     return res.redirect('/dashboard');
   } catch (err) {
@@ -134,9 +143,11 @@ router.post('/set-language', (req, res) => {
   const isSupported = SUPPORTED_LANGUAGES.some(l => l.code === lang);
   if (isSupported) {
     req.session.lang = lang;
+    res.cookie('edusaarthi_language', lang, { maxAge: 365 * 24 * 60 * 60 * 1000, httpOnly: false, sameSite: 'lax', path: '/' });
     if (req.session.user) {
       req.session.user.preferred_language = lang;
       db.run('UPDATE users SET preferred_language = ? WHERE id = ?', [lang, req.session.user.id]);
+      db.run('INSERT OR REPLACE INTO user_settings (user_id, preferred_language) VALUES (?, ?)', [req.session.user.id, lang]);
     }
     return res.json({ success: true, lang });
   }

@@ -7,12 +7,17 @@ async function seed() {
   // Clear existing data to allow idempotent re-seeding
   db.exec(`
     DELETE FROM mentor_requests;
+    DELETE FROM quiz_attempts;
+    DELETE FROM quiz_questions;
+    DELETE FROM quizzes;
+    DELETE FROM user_settings;
     DELETE FROM progress;
     DELETE FROM lessons;
     DELETE FROM courses;
     DELETE FROM scholarships;
     DELETE FROM mentors;
     DELETE FROM users;
+    DELETE FROM sqlite_sequence;
   `);
 
   // 1. Seed Demo User
@@ -1132,6 +1137,385 @@ An algorithm is a step-by-step set of clear instructions to solve a particular p
     );
   }
   console.log(`✓ Sample student progress seeded for Rahul`);
+
+  // 7. Seed User Settings for Demo Student
+  db.run(
+    `INSERT INTO user_settings (user_id, preferred_language, low_data, voice_enabled, theme, college_name, target_career, subjects)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      demoUserId,
+      'hi',
+      0,
+      1,
+      'light',
+      'Birsa Munda Inter College, Ranchi',
+      'State Administrative Services & Civil Services',
+      'Geography, Political Science, Economics, Science, English'
+    ]
+  );
+  console.log(`✓ User settings seeded for demo student`);
+
+  // 8. Seed Quizzes & Questions
+  const quizzesData = [
+    {
+      slug: 'daily-challenge-geography',
+      title: 'Daily Challenge: Indian Geography & Resources',
+      title_hi: 'दैनिक चुनौती: भारतीय भूगोल एवं संसाधन',
+      category: 'Geography',
+      education_level: 'Higher Secondary & College',
+      description: 'Quick 5-question daily drill on Indian river basins, soils, natural resources, and physical divisions.',
+      description_hi: 'भारतीय नदी घाटियों, मृदा, प्राकृतिक संसाधनों एवं भौतिक विभाजन पर 5 प्रश्नों का त्वरित दैनिक टेस्ट।',
+      time_limit_minutes: 5,
+      total_questions: 5,
+      difficulty: 'Intermediate',
+      icon: '🌍',
+      is_daily_challenge: 1,
+      questions: [
+        {
+          question: 'Which river is known as the "Dakshin Ganga" (Ganga of the South) owing to its length and spiritual significance?',
+          question_hi: 'अपनी लंबाई और पवित्रता के कारण किस नदी को "दक्षिण गंगा" कहा जाता है?',
+          options: ['Godavari', 'Krishna', 'Cauvery', 'Mahanadi'],
+          options_hi: ['गोदावरी', 'कृष्णा', 'कावेरी', 'महानदी'],
+          correct_index: 0,
+          explanation: 'The Godavari is the longest river of peninsular India (1,465 km) and is traditionally called Dakshin Ganga.',
+          explanation_hi: 'गोदावरी प्रायद्वीपीय भारत की सबसे लंबी नदी (1,465 किमी) है और इसे दक्षिण गंगा के नाम से जाना जाता है।'
+        },
+        {
+          question: 'Which soil type covers over 40% of India and is the most fertile for agricultural food production?',
+          question_hi: 'भारत के 40% से अधिक क्षेत्र में कौन सी उपजाऊ मिट्टी फैली हुई है जो खाद्यान्न उत्पादन के लिए सर्वोत्तम है?',
+          options: ['Black Soil', 'Alluvial Soil', 'Red Soil', 'Laterite Soil'],
+          options_hi: ['काली मिट्टी', 'जलोढ़ मिट्टी', 'लाल मिट्टी', 'लेटराइट मिट्टी'],
+          correct_index: 1,
+          explanation: 'Alluvial soil brought down by Himalayan and peninsular river systems is rich in potash and humic nutrients.',
+          explanation_hi: 'नदियों द्वारा लाई गई जलोढ़ मिट्टी भारत के उत्तरी मैदानों और तटीय क्षेत्रों में सबसे उपजाऊ मिट्टी है।'
+        },
+        {
+          question: 'Through how many Indian states does the Tropic of Cancer (23.5° N) pass?',
+          question_hi: 'कर्क रेखा (23.5° N) भारत के कितने राज्यों से होकर गुजरती है?',
+          options: ['6 States', '7 States', '8 States', '9 States'],
+          options_hi: ['6 राज्य', '7 राज्य', '8 राज्य', '9 राज्य'],
+          correct_index: 2,
+          explanation: 'Tropic of Cancer passes through 8 states: Gujarat, Rajasthan, MP, Chhattisgarh, Jharkhand, West Bengal, Tripura, and Mizoram.',
+          explanation_hi: 'कर्क रेखा 8 राज्यों से गुजरती है: गुजरात, राजस्थान, म.प्र., छत्तीसगढ़, झारखंड, प. बंगाल, त्रिपुरा और मिज़ोरम।'
+        },
+        {
+          question: 'Which is the highest mountain peak in the Western Ghats and peninsular India?',
+          question_hi: 'पश्चिमी घाट और प्रायद्वीपीय भारत की सबसे ऊँची पर्वत चोटी कौन सी है?',
+          options: ['Anamudi (Kerala)', 'Doddabetta (Tamil Nadu)', 'Kalsubai (Maharashtra)', 'Mahendragiri (Odisha)'],
+          options_hi: ['अनामुडी (केरल)', 'दोद्दाबेट्टा (तमिलनाडु)', 'कलसुबाई (महाराष्ट्र)', 'महेंद्रगिरि (ओडिशा)'],
+          correct_index: 0,
+          explanation: 'Anamudi, located in the Anamalai Hills of Kerala at an elevation of 2,695 meters, is the highest peak in peninsular India.',
+          explanation_hi: 'केरल के अन्नामलाई पर्वतमाला में स्थित अनामुडी (2,695 मीटर) प्रायद्वीपीय भारत की सबसे ऊँची चोटी है।'
+        },
+        {
+          question: 'Which Indian state is currently the leader in solar energy generation capacity?',
+          question_hi: 'भारत में वर्तमान में सौर ऊर्जा उत्पादन क्षमता में कौन सा राज्य शीर्ष पर है?',
+          options: ['Punjab', 'Rajasthan', 'Kerala', 'Assam'],
+          options_hi: ['पंजाब', 'राजस्थान', 'केरल', 'असम'],
+          correct_index: 1,
+          explanation: 'Rajasthan leads India in solar power capacity due to its Thar desert landscape and highest solar insolation.',
+          explanation_hi: 'विशाल भू-भाग और प्रचुर धूप के कारण राजस्थान सौर ऊर्जा उत्पादन क्षमता में भारत में सबसे आगे है।'
+        }
+      ]
+    },
+    {
+      slug: 'human-geography-population',
+      title: 'Human Geography: Population & Migration',
+      title_hi: 'मानव भूगोल: जनसंख्या, प्रवास एवं ग्रामीण विकास',
+      category: 'Geography',
+      education_level: 'Undergraduate & Class 12',
+      description: 'Understand demographic transitions, push-pull factors of migration, and rural livelihood challenges.',
+      description_hi: 'जनसांख्यिकीय संक्रमण, प्रवास के प्रेरक कारक तथा ग्रामीण आजीविका के अवसरों का परीक्षण।',
+      time_limit_minutes: 6,
+      total_questions: 5,
+      difficulty: 'Intermediate',
+      icon: '👥',
+      is_daily_challenge: 0,
+      questions: [
+        {
+          question: 'Which factor is considered a prominent "Push Factor" causing rural youth to migrate towards urban agglomerations?',
+          question_hi: 'ग्रामीण युवाओं को शहरों की ओर प्रवास करने के लिए विवश करने वाला प्रमुख "प्रतिकर्ष (Push) कारक" कौन सा है?',
+          options: ['Desire for high entertainment', 'Lack of local healthcare and viable employment', 'Cheap urban housing', 'Excess rural rainfall'],
+          options_hi: ['मनोरंजन की चाहत', 'स्थानीय स्वास्थ्य सुविधाओं और आजीविका के अवसरों की कमी', 'सस्ता शहरी आवास', 'अत्यधिक वर्षा'],
+          correct_index: 1,
+          explanation: 'Push factors are adverse conditions (underemployment, crop failure, lack of hospitals) that push people away from their origin.',
+          explanation_hi: 'प्रतिकर्ष कारक वे प्रतिकूल परिस्थितियाँ हैं (बेरोजगारी, सूखा, स्वास्थ्य सेवाओं की कमी) जो लोगों को अपना मूल स्थान छोड़ने पर मजबूर करती हैं।'
+        },
+        {
+          question: 'What is the term for the economic growth potential that results when a country has a higher share of working-age population compared to dependents?',
+          question_hi: 'उस आर्थिक विकास क्षमता को क्या कहते हैं जब किसी देश में आश्रितों की तुलना में कामकाजी आयु वर्ग की आबादी अधिक होती है?',
+          options: ['Dependency Ratio', 'Demographic Dividend', 'Population Explosion', 'Brain Drain'],
+          options_hi: ['आश्रितता अनुपात', 'जनसांख्यिकीय लाभांश (Demographic Dividend)', 'जनसंख्या विस्फोट', 'प्रतिभा पलायन'],
+          correct_index: 1,
+          explanation: 'Demographic dividend occurs when the proportion of working people in the total population is high, boosting productivity.',
+          explanation_hi: 'जनसांख्यिकीय लाभांश तब प्राप्त होता है जब कार्यशील आयु वर्ग (15-59 वर्ष) का अनुपात कुल आबादी में सर्वाधिक होता है।'
+        },
+        {
+          question: 'According to the Census of India, which of the following criteria defines a Census Town?',
+          question_hi: 'भारत की जनगणना के अनुसार, "जनगणना नगर (Census Town)" की क्या परिभाषा है?',
+          options: ['Any village near a highway', 'Minimum 5,000 population with at least 75% male main working force engaged in non-agricultural pursuits', 'Presence of a railway station', 'Any district headquarters'],
+          options_hi: ['राजमार्ग के पास का कोई भी गाँव', 'न्यूनतम 5,000 आबादी तथा 75% पुरुष कार्यबल गैर-कृषि कार्यों में संलग्न', 'रेलवे स्टेशन की उपस्थिति', 'केवल जिला मुख्यालय'],
+          correct_index: 1,
+          explanation: 'Census town criteria: Minimum population 5,000, 75% non-agricultural male workforce, and density >= 400 per sq km.',
+          explanation_hi: 'जनगणना नगर के लिए न्यूनतम 5,000 आबादी, कम से कम 75% पुरुष गैर-कृषि में और 400 व्यक्ति/वर्ग किमी घनत्व आवश्यक है।'
+        },
+        {
+          question: 'What traditional water conservation practice is widely used in Chota Nagpur Plateau and Jharkhand tribal belt?',
+          question_hi: 'छोटानागपुर पठार और झारखंड के जनजातीय क्षेत्रों में जल संरक्षण के लिए पारंपरिक रूप से क्या बनाया जाता है?',
+          options: ['Deep canal tube-wells', 'Doba (small farm ponds) and loose boulder check dams', 'Plastic reservoir tanks', 'Paved cement gutters'],
+          options_hi: ['गहरे ट्यूबवेल', 'डोभा (खेत-तालाब) एवं बोल्डर चेकडैम', 'प्लास्टिक टैंक', 'पक्की सीमेंट नालियाँ'],
+          correct_index: 1,
+          explanation: 'Doba and check dams trap surface runoff during monsoons, helping recharge groundwater for winter crops.',
+          explanation_hi: 'डोभा और चेकडैम वर्षा जल को रोककर भूजल स्तर सुधारते हैं और रबी फसलों के लिए सिंचाई प्रदान करते हैं।'
+        },
+        {
+          question: 'Which sector of the economy still engages the largest percentage of India’s rural workforce?',
+          question_hi: 'अर्थव्यवस्था का कौन सा क्षेत्र आज भी भारत के ग्रामीण कार्यबल के सबसे बड़े हिस्से को रोजगार देता है?',
+          options: ['Software Engineering', 'Agriculture and allied activities', 'Banking and Financial Services', 'Aviation'],
+          options_hi: ['सॉफ्टवेयर इंजीनियरिंग', 'कृषि एवं संबद्ध गतिविधियाँ', 'बैंकिंग एवं वित्तीय सेवाएँ', 'विमानन क्षेत्र'],
+          correct_index: 1,
+          explanation: 'Agriculture and allied sectors continue to employ over 45-50% of the rural working population in India.',
+          explanation_hi: 'कृषि और पशुपालन क्षेत्र भारत के ग्रामीण कार्यबल के 45-50% से अधिक लोगों को रोज़गार प्रदान करता है।'
+        }
+      ]
+    },
+    {
+      slug: 'indian-constitution-polity',
+      title: 'Indian Polity: Constitution & Governance',
+      title_hi: 'भारतीय राजव्यवस्था: संविधान, अधिकार एवं पंचायती राज',
+      category: 'Political Science',
+      education_level: 'Higher Secondary & College',
+      description: 'Master Fundamental Rights, Panchayati Raj decentralized democracy, and constitutional machinery.',
+      description_hi: 'मौलिक अधिकार, पंचायती राज व्यवस्था और भारतीय संविधान के मूल सिद्धांतों का अभ्यास।',
+      time_limit_minutes: 5,
+      total_questions: 5,
+      difficulty: 'Intermediate',
+      icon: '⚖️',
+      is_daily_challenge: 0,
+      questions: [
+        {
+          question: 'Which Article of the Constitution guarantees "Equality before Law" and "Equal Protection of the Laws"?',
+          question_hi: 'संविधान का कौन सा अनुच्छेद "विधि के समक्ष समता" और "विधियों के समान संरक्षण" की गारंटी देता है?',
+          options: ['Article 12', 'Article 14', 'Article 19', 'Article 21'],
+          options_hi: ['अनुच्छेद 12', 'अनुच्छेद 14', 'अनुच्छेद 19', 'अनुच्छेद 21'],
+          correct_index: 1,
+          explanation: 'Article 14 forms the foundation of equality in India, prohibiting arbitrary state discrimination.',
+          explanation_hi: 'अनुच्छेद 14 भारत में समानता का अधिकार सुनिश्चित करता है और राज्य के मनमाने भेदभाव को रोकता है।'
+        },
+        {
+          question: 'The 73rd Constitutional Amendment Act, 1992 granted constitutional status to which institution?',
+          question_hi: '73वें संविधान संशोधन अधिनियम, 1992 द्वारा किस संस्था को संवैधानिक दर्जा प्रदान किया गया?',
+          options: ['Municipal Corporations', 'Panchayati Raj Institutions (PRIs)', 'Central Bureau of Investigation', 'NITI Aayog'],
+          options_hi: ['नगर निगम', 'पंचायती राज संस्थाएँ (PRIs)', 'सीबीआई', 'नीति आयोग'],
+          correct_index: 1,
+          explanation: 'The 73rd Amendment added Part IX and the 11th Schedule, establishing a 3-tier Panchayati Raj system.',
+          explanation_hi: '73वें संशोधन ने संविधान में भाग IX और 11वीं अनुसूची जोड़कर 3-स्तरीय पंचायती राज व्यवस्था स्थापित की।'
+        },
+        {
+          question: 'Which Fundamental Right was termed by Dr. B.R. Ambedkar as the "Heart and Soul" of the Indian Constitution?',
+          question_hi: 'डॉ. बी.आर. आंबेडकर ने किस मौलिक अधिकार को भारतीय संविधान का "हृदय और आत्मा" कहा था?',
+          options: ['Right to Freedom of Speech', 'Right to Constitutional Remedies (Article 32)', 'Right to Education (Article 21A)', 'Right against Exploitation'],
+          options_hi: ['वाक् एवं अभिव्यक्ति की स्वतंत्रता', 'संवैधानिक उपचारों का अधिकार (अनुच्छेद 32)', 'शिक्षा का अधिकार', 'शोषण के विरुद्ध अधिकार'],
+          correct_index: 1,
+          explanation: 'Article 32 empowers citizens to directly approach the Supreme Court via writs to enforce Fundamental Rights.',
+          explanation_hi: 'अनुच्छेद 32 नागरिकों को मौलिक अधिकारों के उल्लंघन पर सीधे सर्वोच्च न्यायालय जाने का अधिकार देता है।'
+        },
+        {
+          question: 'What is the minimum voting age for Indian citizens as established by the 61st Amendment Act?',
+          question_hi: '61वें संविधान संशोधन अधिनियम द्वारा भारतीय नागरिकों के लिए मतदान की न्यूनतम आयु कितनी निर्धारित की गई?',
+          options: ['16 Years', '18 Years', '21 Years', '25 Years'],
+          options_hi: ['16 वर्ष', '18 वर्ष', '21 वर्ष', '25 वर्ष'],
+          correct_index: 1,
+          explanation: 'The 61st Constitutional Amendment in 1988 reduced the voting age from 21 to 18 years under Article 326.',
+          explanation_hi: '1988 के 61वें संशोधन द्वारा अनुच्छेद 326 में संशोधन कर मतदान की आयु 21 वर्ष से घटाकर 18 वर्ष की गई।'
+        },
+        {
+          question: 'Who conducts elections to Panchayats and Urban Local Bodies in India?',
+          question_hi: 'भारत में पंचायतों और नगर निकायों के चुनाव कौन आयोजित करता है?',
+          options: ['Election Commission of India', 'State Election Commission', 'District Magistrate', 'Ministry of Rural Development'],
+          options_hi: ['भारत निर्वाचन आयोग', 'राज्य निर्वाचन आयोग (State Election Commission)', 'ज़िलाधिकारी', 'ग्रामीण विकास मंत्रालय'],
+          correct_index: 1,
+          explanation: 'State Election Commissions established under Article 243K conduct rural and urban local body elections.',
+          explanation_hi: 'अनुच्छेद 243K के तहत गठित राज्य निर्वाचन आयोग पंचायतों एवं नगरपालिकाओं के चुनाव कराता है।'
+        }
+      ]
+    },
+    {
+      slug: 'economics-rural-banking',
+      title: 'Economics: Rural Banking & Financial Inclusion',
+      title_hi: 'अर्थशास्त्र: ग्रामीण बैंकिंग एवं वित्तीय समावेशन',
+      category: 'Economics',
+      education_level: 'Higher Secondary & College',
+      description: 'Learn how self-help groups, microcredit, and formal banking empower rural households.',
+      description_hi: 'स्वयं सहायता समूह, किसान क्रेडिट कार्ड और औपचारिक बैंकिंग कैसे ग्रामीण आर्थिकी को मजबूत करते हैं।',
+      time_limit_minutes: 5,
+      total_questions: 5,
+      difficulty: 'Intermediate',
+      icon: '💰',
+      is_daily_challenge: 0,
+      questions: [
+        {
+          question: 'Which apex financial institution in India regulates and provides credit for agriculture and rural development?',
+          question_hi: 'भारत में कृषि एवं ग्रामीण विकास हेतु ऋण व नियमन प्रदान करने वाली शीर्ष वित्तीय संस्था कौन सी है?',
+          options: ['SEBI', 'NABARD (National Bank for Agriculture and Rural Development)', 'TRAI', 'SIDBI'],
+          options_hi: ['सेबी (SEBI)', 'नाबार्ड (NABARD)', 'ट्राई (TRAI)', 'सिडबी (SIDBI)'],
+          correct_index: 1,
+          explanation: 'NABARD was set up in 1982 on the recommendation of the Shivaraman Committee to foster rural prosperity.',
+          explanation_hi: 'नाबार्ड की स्थापना 1982 में ग्रामीण अर्थव्यवस्था, कृषि और कुटीर उद्योगों को ऋण सहायता देने हेतु की गई थी।'
+        },
+        {
+          question: 'What is the primary role of Self-Help Groups (SHGs) in village communities?',
+          question_hi: 'ग्रामीण समुदायों में स्वयं सहायता समूहों (SHGs) की मुख्य भूमिका क्या है?',
+          options: ['Running political campaigns', 'Pooling small savings and providing collateral-free emergency loans to members', 'Building highways', 'Importing goods from abroad'],
+          options_hi: ['राजनीतिक प्रचार करना', 'छोटी बचत एकत्र करना तथा सदस्यों को बिना गारंटी आपातकालीन ऋण देना', 'सड़कें बनाना', 'विदेशी सामान मंगाना'],
+          correct_index: 1,
+          explanation: 'SHGs promote thrift and mutual credit, freeing rural women from high-interest informal moneylenders.',
+          explanation_hi: 'SHG महिलाओं में बचत की आदत डालते हैं और साहूकारों के भारी ब्याज के चंगुल से मुक्ति दिलाते हैं।'
+        },
+        {
+          question: 'What is the main objective of the Kisan Credit Card (KCC) scheme?',
+          question_hi: 'किसान क्रेडिट कार्ड (KCC) योजना का मुख्य उद्देश्य क्या है?',
+          options: ['Providing free luxury cars', 'Providing adequate and timely institutional credit to farmers for crop cultivation and inputs', 'Free electricity forever', 'Waiving all future taxes'],
+          options_hi: ['मुफ्त विलासिता कार देना', 'किसानों को खेती के लिए समय पर व कम ब्याज दर पर संस्थागत ऋण उपलब्ध कराना', 'मुफ्त बिजली देना', 'सभी कर माफ़ करना'],
+          correct_index: 1,
+          explanation: 'KCC enables farmers to buy seeds, fertilizers, and farm equipment without bureaucratic delays.',
+          explanation_hi: 'KCC किसानों को बीज, खाद और कीटनाशक खरीदने के लिए उचित दर पर बैंक ऋण की सुविधा देता है।'
+        },
+        {
+          question: 'What does "Financial Inclusion" broadly mean?',
+          question_hi: '"वित्तीय समावेशन (Financial Inclusion)" का व्यापक अर्थ क्या है?',
+          options: ['Every person becoming a billionaire', 'Providing universal access to affordable and fair financial services (savings, credit, insurance)', 'Printing unlimited currency notes', 'Closing down all regional banks'],
+          options_hi: ['हर व्यक्ति का अरबपति बनना', 'सभी नागरिकों को वहनीय एवं सुरक्षित बैंकिंग, बचत, ऋण व बीमा सेवाओं तक पहुँच देना', 'असीमित नोट छापना', 'ग्रामीण बैंक बंद करना'],
+          correct_index: 1,
+          explanation: 'Financial inclusion ensures vulnerable rural and tribal families have access to formal savings, remittances, and credit.',
+          explanation_hi: 'वित्तीय समावेशन का तात्पर्य वंचित तबकों को औपचारिक वित्तीय प्रणाली से जोड़ना है।'
+        },
+        {
+          question: 'Under MGNREGA, how many days of guaranteed wage employment are provided per financial year to rural households?',
+          question_hi: 'मनरेगा (MGNREGA) के तहत ग्रामीण परिवारों को एक वित्तीय वर्ष में कितने दिनों के गारंटीकृत रोजगार का अधिकार है?',
+          options: ['50 Days', '100 Days', '150 Days', '365 Days'],
+          options_hi: ['50 दिन', '100 दिन', '150 दिन', '365 दिन'],
+          correct_index: 1,
+          explanation: 'MGNREGA guarantees 100 days of unskilled manual work to every rural household whose adult members volunteer.',
+          explanation_hi: 'मनरेगा ग्रामीण अकुशल कार्यबल को प्रति वर्ष कम से कम 100 दिन के काम की कानूनी गारंटी प्रदान करता है।'
+        }
+      ]
+    },
+    {
+      slug: 'general-science-practice',
+      title: 'General Science: Energy & Environment',
+      title_hi: 'सामान्य विज्ञान: ऊर्जा, पर्यावरण एवं दैनिक प्रौद्योगिकी',
+      category: 'Science',
+      education_level: 'Class 10 & Competitive Prep',
+      description: 'Test your understanding of physics, chemistry in the kitchen, and environmental protection.',
+      description_hi: 'दैनिक जीवन में प्रयुक्त भौतिकी, रसोई का रसायन और पर्यावरण संतुलन से जुड़े मुख्य प्रश्न।',
+      time_limit_minutes: 5,
+      total_questions: 5,
+      difficulty: 'Easy',
+      icon: '⚡',
+      is_daily_challenge: 0,
+      questions: [
+        {
+          question: 'Which gas is primarily responsible for the natural and enhanced greenhouse effect on planet Earth?',
+          question_hi: 'पृथ्वी पर ग्रीनहाउस प्रभाव और तापमान वृद्धि के लिए मुख्य रूप से कौन सी गैस उत्तरदायी है?',
+          options: ['Oxygen (O2)', 'Carbon Dioxide (CO2)', 'Nitrogen (N2)', 'Helium (He)'],
+          options_hi: ['ऑक्सीजन', 'कार्बन डाइऑक्साइड (CO2)', 'नाइट्रोजन', 'हीलियम'],
+          correct_index: 1,
+          explanation: 'Carbon dioxide traps infrared thermal radiation re-emitted by the Earth surface, warming the atmosphere.',
+          explanation_hi: 'कार्बन डाइऑक्साइड पृथ्वी से निकलने वाले ऊष्मीय विकिरण को रोककर वातावरण को गर्म रखती है।'
+        },
+        {
+          question: 'What is the basic functional and structural unit of life in all living organisms?',
+          question_hi: 'सभी जीवित प्राणियों में जीवन की आधारभूत कार्यात्मक और संरचनात्मक इकाई क्या है?',
+          options: ['Atom', 'Cell', 'Tissue', 'Organ System'],
+          options_hi: ['परमाणु', 'कोशिका (Cell)', 'ऊतक', 'अंग तंत्र'],
+          correct_index: 1,
+          explanation: 'The cell is the smallest unit of life capable of independent reproduction and metabolic functions.',
+          explanation_hi: 'कोशिका सभी जीवों की मौलिक संरचनात्मक और क्रियात्मक इकाई है।'
+        },
+        {
+          question: 'Why do stars appear to twinkle when observed from the ground at night?',
+          question_hi: 'रात में ज़मीन से देखने पर तारे टिमटिमाते हुए क्यों दिखाई देते हैं?',
+          options: ['Stars constantly turn off and on', 'Atmospheric refraction of starlight through turbulent air layers of varying density', 'Reflected moon shadows', 'Solar wind interference'],
+          options_hi: ['तारे लगातार जलते-बुझते हैं', 'वायुमंडल की विभिन्न घनत्व वाली परतों द्वारा तारों के प्रकाश का अपवर्तन (Refraction)', 'चंद्रमा की परछाई', 'सौर पवनों का व्यवधान'],
+          correct_index: 1,
+          explanation: 'As starlight passes through moving air layers of different temperatures, its apparent path bends continuously.',
+          explanation_hi: 'वायुमंडल में हवा के विभिन्न तापमान और घनत्व के कारण प्रकाश का लगातार अपवर्तन होता है जिससे तारे टिमटिमाते हैं।'
+        },
+        {
+          question: 'What energy transformation takes place in a solar photovoltaic cell?',
+          question_hi: 'सौर फोटोवोल्टिक सेल (Solar Panel) में ऊर्जा का कौन सा रूपांतरण होता है?',
+          options: ['Sound into electricity', 'Light energy directly into electrical energy', 'Heat into chemical energy', 'Magnetic into mechanical energy'],
+          options_hi: ['ध्वनि का बिजली में', 'प्रकाश ऊर्जा का सीधे विद्युत ऊर्जा में', 'ऊष्मा का रासायनिक में', 'चुंबकीय का यांत्रिक में'],
+          correct_index: 1,
+          explanation: 'Solar photovoltaic cells utilize semiconductor materials (silicon) to convert photons directly into electric current.',
+          explanation_hi: 'सोलर सेल सूर्य के प्रकाश (फोटॉन) को सिलिकॉन सेमीकंडक्टर द्वारा सीधे विद्युत धारा में बदलते हैं।'
+        },
+        {
+          question: 'Which safety device protects domestic electrical appliances by melting when current exceeds safety limits?',
+          question_hi: 'अत्यधिक विद्युत धारा प्रवाहित होने पर पिघलकर घर के उपकरणों को जलने से बचाने वाला सुरक्षा उपकरण कौन सा है?',
+          options: ['Voltmeter', 'Electric Fuse wire', 'Thermometer', 'Ammeter'],
+          options_hi: ['वोल्टमीटर', 'इलेक्ट्रिक फ्यूज़ (Electric Fuse)', 'थर्मामीटर', 'अमीटर'],
+          correct_index: 1,
+          explanation: 'A fuse wire has a low melting point and melts via Joule heating when current surges, breaking the circuit.',
+          explanation_hi: 'फ्यूज तार का गलनांक कम होता है; अत्यधिक करंट आने पर यह गर्म होकर पिघल जाता है और परिपथ टूट जाता है।'
+        }
+      ]
+    }
+  ];
+
+  for (const qz of quizzesData) {
+    const qInsert = db.run(
+      `INSERT INTO quizzes (slug, title, title_hi, category, education_level, description, description_hi, time_limit_minutes, total_questions, difficulty, icon, is_daily_challenge)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        qz.slug,
+        qz.title,
+        qz.title_hi,
+        qz.category,
+        qz.education_level,
+        qz.description,
+        qz.description_hi,
+        qz.time_limit_minutes,
+        qz.total_questions,
+        qz.difficulty,
+        qz.icon,
+        qz.is_daily_challenge
+      ]
+    );
+    const quizId = qInsert.lastInsertRowid;
+
+    let qOrder = 1;
+    for (const q of qz.questions) {
+      db.run(
+        `INSERT INTO quiz_questions (quiz_id, question, question_hi, options, options_hi, correct_index, explanation, explanation_hi, order_index)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          quizId,
+          q.question,
+          q.question_hi,
+          JSON.stringify(q.options),
+          JSON.stringify(q.options_hi),
+          q.correct_index,
+          q.explanation,
+          q.explanation_hi,
+          qOrder++
+        ]
+      );
+    }
+  }
+  console.log(`✓ 5 Rich Quizzes with 25 Questions seeded`);
+
+  // 9. Seed Sample Quiz Attempt for Demo Student (80% score)
+  const firstQuiz = db.get('SELECT id FROM quizzes ORDER BY id ASC LIMIT 1');
+  if (firstQuiz) {
+    db.run(
+      `INSERT INTO quiz_attempts (user_id, quiz_id, score, total_questions, time_taken_seconds, user_answers)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [demoUserId, firstQuiz.id, 4, 5, 142, JSON.stringify([0, 1, 2, 0, 0])] // 4 correct out of 5
+    );
+    console.log(`✓ Demo quiz attempt seeded for student Rahul`);
+  }
 
   console.log('🎉 EduSaarthi database successfully seeded!');
 }

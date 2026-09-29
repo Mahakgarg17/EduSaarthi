@@ -1,0 +1,113 @@
+<!-- Modern Student App Desktop Sidebar -->
+<aside class="app-sidebar" aria-label="Student App Navigation">
+  <div class="sidebar-brand-box">
+    <a href="/dashboard" class="brand" aria-label="EduSaarthi Dashboard">
+      <div class="brand-icon" aria-hidden="true">ES</div>
+      <div class="brand-text">
+        <span class="brand-title"><%= t('siteName') %></span>
+        <span class="brand-tagline"><%= t('tagline') %></span>
+      </div>
+    </a>
+  </div>
+
+  <div class="sidebar-section-label"><%= (lang === 'hi') ? 'मुख्य अध्ययन' : 'Core Learning' %></div>
+  <ul class="sidebar-nav">
+    <li>
+      <a href="/dashboard" class="sidebar-link <%= (typeof activeTab !== 'undefined' && activeTab === 'dashboard') ? 'active' : '' %>">
+        <span class="sidebar-icon">🏠</span>
+        <span class="sidebar-label"><%= t('navDashboard') %></span>
+      </a>
+    </li>
+
+    <li>
+      <a href="/learn" class="sidebar-link <%= (typeof activeTab !== 'undefined' && activeTab === 'learn') ? 'active' : '' %>">
+        <span class="sidebar-icon">📖</span>
+        <span class="sidebar-label"><%= t('navLearn') %></span>
+      </a>
+    </li>
+
+    <li>
+      <a href="/tutor" class="sidebar-link <%= (typeof activeTab !== 'undefined' && activeTab === 'tutor') ? 'active' : '' %>">
+        <span class="sidebar-icon">🤖</span>
+        <span class="sidebar-label"><%= t('navTutor') %></span>
+        <span class="badge badge-success sidebar-badge">AI</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="/quizzes" class="sidebar-link <%= (typeof activeTab !== 'undefined' && activeTab === 'quizzes') ? 'active' : '' %>">
+        <span class="sidebar-icon">📝</span>
+        <span class="sidebar-label"><%= t('navQuizzes') %></span>
+        <span class="badge badge-accent sidebar-badge">New</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="/progress" class="sidebar-link <%= (typeof activeTab !== 'undefined' && activeTab === 'progress') ? 'active' : '' %>">
+        <span class="sidebar-icon">📊</span>
+        <span class="sidebar-label"><%= t('navProgress') %></span>
+        <span class="sidebar-badge-streak">7🔥</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-section-label" style="margin-top: 1.25rem;"><%= (lang === 'hi') ? 'अवसर एवं मार्गदर्शन' : 'Opportunities & Guidance' %></div>
+  <ul class="sidebar-nav">
+    <li>
+      <a href="/scholarships" class="sidebar-link <%= (typeof activeTab !== 'undefined' && activeTab === 'scholarships') ? 'active' : '' %>">
+        <span class="sidebar-icon">🎓</span>
+        <span class="sidebar-label"><%= t('navScholarships') %></span>
+      </a>
+    </li>
+
+    <li>
+      <a href="/career" class="sidebar-link <%= (typeof activeTab !== 'undefined' && activeTab === 'career') ? 'active' : '' %>">
+        <span class="sidebar-icon">🧭</span>
+        <span class="sidebar-label"><%= t('navCareer') %></span>
+      </a>
+    </li>
+
+    <li>
+      <a href="/mentors" class="sidebar-link <%= (typeof activeTab !== 'undefined' && activeTab === 'mentors') ? 'active' : '' %>">
+        <span class="sidebar-icon">👨‍🏫</span>
+        <span class="sidebar-label"><%= t('navMentors') %></span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-section-label" style="margin-top: 1.25rem;"><%= (lang === 'hi') ? 'खाता एवं प्राथमिकताएं' : 'Account & Settings' %></div>
+  <ul class="sidebar-nav">
+    <li>
+      <a href="/profile" class="sidebar-link <%= (typeof activeTab !== 'undefined' && activeTab === 'profile') ? 'active' : '' %>">
+        <span class="sidebar-icon">👤</span>
+        <span class="sidebar-label"><%= t('navProfile') %></span>
+      </a>
+    </li>
+
+    <li>
+      <a href="/profile/settings" class="sidebar-link <%= (typeof activeTab !== 'undefined' && activeTab === 'settings') ? 'active' : '' %>">
+        <span class="sidebar-icon">⚙️</span>
+        <span class="sidebar-label"><%= t('navSettings') %></span>
+      </a>
+    </li>
+  </ul>
+
+  <!-- Student Mini Profile Card at Bottom of Sidebar -->
+  <div class="sidebar-footer">
+    <% if (user) { %>
+      <div class="sidebar-user-card">
+        <div class="sidebar-avatar"><%= user.name ? user.name.charAt(0).toUpperCase() : 'S' %></div>
+        <div class="sidebar-user-info">
+          <span class="sidebar-user-name"><%= user.name %></span>
+          <span class="sidebar-user-email"><%= user.education_level || 'Class 10' %></span>
+        </div>
+        <a href="/auth/logout" class="sidebar-logout-btn" title="<%= t('navLogout') %>">🚪</a>
+      </div>
+    <% } else { %>
+      <div style="display: flex; gap: 0.5rem; flex-direction: column;">
+        <a href="/auth/login" class="btn btn-sm btn-outline-primary btn-block"><%= t('navLogin') %></a>
+        <a href="/auth/register" class="btn btn-sm btn-primary btn-block"><%= t('navRegister') %></a>
+      </div>
+    <% } %>
+  </div>
+</aside>

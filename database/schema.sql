@@ -106,8 +106,68 @@ CREATE TABLE IF NOT EXISTS mentor_requests (
     FOREIGN KEY (mentor_id) REFERENCES mentors(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS quizzes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT UNIQUE NOT NULL,
+    title TEXT NOT NULL,
+    title_hi TEXT NOT NULL,
+    category TEXT NOT NULL, -- 'Geography', 'Political Science', 'Economics', 'Science', 'Mathematics', 'English', 'General Knowledge'
+    education_level TEXT NOT NULL DEFAULT 'Class 10',
+    description TEXT NOT NULL,
+    description_hi TEXT NOT NULL,
+    time_limit_minutes INTEGER DEFAULT 5,
+    total_questions INTEGER DEFAULT 5,
+    difficulty TEXT DEFAULT 'Intermediate', -- 'Easy', 'Intermediate', 'Advanced'
+    icon TEXT DEFAULT '📝',
+    is_daily_challenge INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS quiz_questions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    quiz_id INTEGER NOT NULL,
+    question TEXT NOT NULL,
+    question_hi TEXT NOT NULL,
+    options TEXT NOT NULL, -- JSON array of 4 options [A, B, C, D]
+    options_hi TEXT NOT NULL, -- JSON array of 4 options in Hindi
+    correct_index INTEGER NOT NULL, -- 0, 1, 2, or 3
+    explanation TEXT NOT NULL,
+    explanation_hi TEXT NOT NULL,
+    order_index INTEGER DEFAULT 0,
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS quiz_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    quiz_id INTEGER NOT NULL,
+    score INTEGER NOT NULL,
+    total_questions INTEGER NOT NULL,
+    time_taken_seconds INTEGER NOT NULL DEFAULT 60,
+    user_answers TEXT NOT NULL, -- JSON array of chosen option indices
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS user_settings (
+    user_id INTEGER PRIMARY KEY,
+    preferred_language TEXT DEFAULT 'hi',
+    low_data INTEGER DEFAULT 0,
+    voice_enabled INTEGER DEFAULT 1,
+    theme TEXT DEFAULT 'light', -- 'light', 'high-contrast', 'dark'
+    college_name TEXT DEFAULT 'Birsa Munda Inter College',
+    target_career TEXT DEFAULT 'Public Administration & Civil Services',
+    subjects TEXT DEFAULT 'Geography, Political Science, Economics, Science',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Indexes for optimized querying
 CREATE INDEX IF NOT EXISTS idx_lessons_course ON lessons(course_id);
 CREATE INDEX IF NOT EXISTS idx_progress_user ON progress(user_id);
 CREATE INDEX IF NOT EXISTS idx_scholarships_state ON scholarships(state);
 CREATE INDEX IF NOT EXISTS idx_scholarships_category ON scholarships(category);
+CREATE INDEX IF NOT EXISTS idx_quiz_questions_quiz ON quiz_questions(quiz_id);
+CREATE INDEX IF NOT EXISTS idx_quiz_attempts_user ON quiz_attempts(user_id);
+CREATE INDEX IF NOT EXISTS idx_quizzes_slug ON quizzes(slug);

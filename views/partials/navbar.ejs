@@ -43,6 +43,8 @@
         <% } %>
         <li><a href="/learn" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'learn') ? 'active' : '' %>"><%= t('navLearn') %></a></li>
         <li><a href="/tutor" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'tutor') ? 'active' : '' %>">🤖 <%= t('navTutor') %></a></li>
+        <li><a href="/quizzes" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'quizzes') ? 'active' : '' %>">📝 <%= t('navQuizzes') %></a></li>
+        <li><a href="/progress" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'progress') ? 'active' : '' %>">📊 <%= t('navProgress') %></a></li>
         <li><a href="/scholarships" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'scholarships') ? 'active' : '' %>">🎓 <%= t('navScholarships') %></a></li>
         <li><a href="/career" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'career') ? 'active' : '' %>">🧭 <%= t('navCareer') %></a></li>
         <li><a href="/mentors" class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'mentors') ? 'active' : '' %>">👨‍🏫 <%= t('navMentors') %></a></li>
@@ -76,9 +78,11 @@
 
       <!-- User Authentication State -->
       <% if (user) { %>
-        <div class="user-chip" title="<%= user.email %>">
-          <div class="user-avatar-mini"><%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %></div>
-          <span class="user-name-short"><%= user.name ? user.name.split(' ')[0] : 'Student' %></span>
+        <div class="user-chip-container">
+          <a href="/profile" class="user-chip" title="<%= user.email %>">
+            <div class="user-avatar-mini"><%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %></div>
+            <span class="user-name-short"><%= user.name ? user.name.split(' ')[0] : 'Student' %></span>
+          </a>
           <a href="/auth/logout" class="btn btn-sm btn-secondary" style="padding: 0.2rem 0.5rem; margin-left: 0.25rem;" title="<%= t('navLogout') %>">✕</a>
         </div>
       <% } else { %>

@@ -31,35 +31,7 @@ router.get('/', (req, res) => {
   });
 });
 
-// 2. View Specific Course
-router.get('/:courseSlug', (req, res) => {
-  const { courseSlug } = req.params;
-  const course = db.get('SELECT * FROM courses WHERE slug = ?', [courseSlug]);
-
-  if (!course) {
-    return res.redirect('/learn');
-  }
-
-  const lessons = db.query('SELECT * FROM lessons WHERE course_id = ? ORDER BY order_index ASC', [course.id]);
-
-  // Check user progress if logged in
-  let userProgress = {};
-  if (req.session.user) {
-    const progressList = db.query('SELECT lesson_id, completed, quiz_score FROM progress WHERE user_id = ?', [req.session.user.id]);
-    progressList.forEach(p => {
-      userProgress[p.lesson_id] = p;
-    });
-  }
-
-  res.render('course', {
-    activeTab: 'learn',
-    course,
-    lessons,
-    userProgress
-  });
-});
-
-// 3. View Lesson by ID
+// 2. View Lesson by ID
 router.get('/lesson/:id', (req, res) => {
   const lessonId = parseInt(req.params.id, 10);
   const lesson = db.get('SELECT * FROM lessons WHERE id = ?', [lessonId]);
@@ -104,7 +76,7 @@ router.get('/lesson/:id', (req, res) => {
   });
 });
 
-// 4. API to Download Lesson for Offline Cache / IndexedDB
+// 3. API to Download Lesson for Offline Cache / IndexedDB
 router.get('/api/lesson/:id', (req, res) => {
   const lessonId = parseInt(req.params.id, 10);
   const lesson = db.get('SELECT * FROM lessons WHERE id = ?', [lessonId]);
@@ -115,6 +87,34 @@ router.get('/api/lesson/:id', (req, res) => {
   res.json({
     ...lesson,
     course
+  });
+});
+
+// 4. View Specific Course
+router.get('/:courseSlug', (req, res) => {
+  const { courseSlug } = req.params;
+  const course = db.get('SELECT * FROM courses WHERE slug = ?', [courseSlug]);
+
+  if (!course) {
+    return res.redirect('/learn');
+  }
+
+  const lessons = db.query('SELECT * FROM lessons WHERE course_id = ? ORDER BY order_index ASC', [course.id]);
+
+  // Check user progress if logged in
+  let userProgress = {};
+  if (req.session.user) {
+    const progressList = db.query('SELECT lesson_id, completed, quiz_score FROM progress WHERE user_id = ?', [req.session.user.id]);
+    progressList.forEach(p => {
+      userProgress[p.lesson_id] = p;
+    });
+  }
+
+  res.render('course', {
+    activeTab: 'learn',
+    course,
+    lessons,
+    userProgress
   });
 });
 

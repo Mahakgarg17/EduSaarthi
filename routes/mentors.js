@@ -31,8 +31,9 @@ router.post('/request', (req, res) => {
   const { mentor_id, subject, message, preferred_language } = req.body;
   const mentorId = parseInt(mentor_id, 10);
 
-  // If not logged in, fallback to demo user ID 1
-  const userId = req.session.user ? req.session.user.id : 1;
+  // If not logged in, fallback to first available user
+  const fallbackUser = db.get('SELECT id FROM users ORDER BY id ASC LIMIT 1');
+  const userId = req.session.user ? req.session.user.id : (fallbackUser ? fallbackUser.id : 1);
 
   try {
     db.run(

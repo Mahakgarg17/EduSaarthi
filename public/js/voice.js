@@ -21,8 +21,8 @@ window.EduVoice = {
   isListening: false,
 
   getSpeechLangCode(lang) {
-    const docLang = lang || document.documentElement.lang || 'hi';
-    return SPEECH_LANG_MAP[docLang] || 'hi-IN';
+    const current = lang || (window.EduSaarthiLanguage ? window.EduSaarthiLanguage.get() : (document.documentElement.lang || 'hi'));
+    return SPEECH_LANG_MAP[current] || 'hi-IN';
   },
 
   // Initialize Speech Recognition

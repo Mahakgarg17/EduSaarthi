@@ -17,6 +17,9 @@
       </div>
 
       <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <button type="button" class="btn btn-sm btn-secondary" id="stop-tts-global-btn" onclick="window.EduVoice && window.EduVoice.stopSpeaking()" title="Stop audio speech">
+          ⏹ <%= (lang === 'hi') ? 'आवाज़ रोकें' : 'Stop Audio' %>
+        </button>
         <span class="badge badge-slate" id="chat-lang-indicator">
           🌐 <%= typeof currentLanguage !== 'undefined' ? currentLanguage.label : 'हिन्दी' %>
         </span>
@@ -127,6 +130,25 @@
       </button>
     </div>
 
+    <!-- Quick Action Helper Prompts Bar -->
+    <div class="tutor-quick-actions-bar" aria-label="Quick Prompt Shortcuts">
+      <button type="button" class="quick-prompt-action" data-prompt="<%= (lang === 'hi') ? 'कृपया इसे और सरल व आसान भाषा में समझाएं।' : 'Please explain this concept simply with basic words.' %>">
+        💡 <%= (lang === 'hi') ? 'सरल भाषा में समझाओ' : 'Explain this simply' %>
+      </button>
+      <button type="button" class="quick-prompt-action" data-prompt="<%= (lang === 'hi') ? 'कृपया इसका एक दैनिक जीवन और ग्रामीण परिवेश का व्यावहारिक उदाहरण दें।' : 'Give me an everyday practical example of this.' %>">
+        🌱 <%= (lang === 'hi') ? 'एक उदाहरण दें' : 'Give me an example' %>
+      </button>
+      <button type="button" class="quick-prompt-action" data-prompt="<%= (lang === 'hi') ? 'कृपया इसे हिन्दी और आसान भाषा में समझाएं।' : 'Explain this in Hindi as well.' %>">
+        🌐 <%= (lang === 'hi') ? 'हिन्दी में समझाओ' : 'Explain in Hindi' %>
+      </button>
+      <button type="button" class="quick-prompt-action" data-prompt="<%= (lang === 'hi') ? 'कृपया इस विषय का 3 मुख्य बिंदुओं में संक्षेप में सार (Summary) बताएं।' : 'Please summarize this in 3 concise bullet points.' %>">
+        📝 <%= (lang === 'hi') ? 'संक्षेप में सार' : 'Summarize this' %>
+      </button>
+      <button type="button" class="quick-prompt-action" data-prompt="<%= (lang === 'hi') ? 'इस विषय पर मेरी समझ जांचने के लिए मुझसे 2 बहुविकल्पीय प्रश्न पूछें।' : 'Quiz me on this topic with 2 practice questions.' %>">
+        ❓ <%= (lang === 'hi') ? 'मुझसे सवाल पूछो' : 'Quiz me on this topic' %>
+      </button>
+    </div>
+
     <!-- Chat Input Form -->
     <form id="chat-form" class="chat-input-bar">
       <button type="button" id="voice-mic-btn" class="mic-btn" title="Speak question using microphone" aria-label="Microphone">
@@ -167,8 +189,9 @@
     const parentBubble = btn.closest('.chat-bubble');
     if (!parentBubble) return;
     const textElement = parentBubble.querySelector('.bubble-text');
+    const activeLang = window.EduSaarthiLanguage ? window.EduSaarthiLanguage.get() : '<%= lang || "hi" %>';
     if (textElement && window.EduVoice) {
-      window.EduVoice.speak(textElement.innerText, '<%= lang || "hi" %>');
+      window.EduVoice.speak(textElement.innerText, activeLang);
     }
   }
 
@@ -194,9 +217,14 @@
         bubble.innerHTML = `
           <div class="msg-header">
             <strong>EduSaarthi AI</strong>
-            <button type="button" class="read-aloud-btn" onclick="readBubbleText(this)">
-              🔊 <%= (lang === 'hi') ? 'सुनाएँ' : 'Read Aloud' %>
-            </button>
+            <div style="display: flex; gap: 0.35rem;">
+              <button type="button" class="read-aloud-btn" onclick="readBubbleText(this)">
+                🔊 <%= (lang === 'hi') ? 'सुनाएँ' : 'Read Aloud' %>
+              </button>
+              <button type="button" class="read-aloud-btn" onclick="window.EduVoice && window.EduVoice.stopSpeaking()" style="color: #DC2626;" title="Stop audio">
+                ⏹ <%= (lang === 'hi') ? 'रोकें' : 'Stop' %>
+              </button>
+            </div>
           </div>
           <div class="bubble-text">${renderMarkdownText(text)}</div>
         `;
@@ -233,13 +261,15 @@
 
       chatSendBtn.disabled = true;
 
+      const activeLang = window.EduSaarthiLanguage ? window.EduSaarthiLanguage.get() : '<%= lang || "hi" %>';
+
       try {
         const res = await fetch('/tutor/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: query,
-            language: '<%= lang || "hi" %>',
+            language: activeLang,
             educationLevel: '<%= (user && user.education_level) ? user.education_level : "Class 10" %>',
             history: messageHistory
           })
@@ -264,6 +294,16 @@
         chatInput.focus();
       }
     }
+
+    // Quick Action Helper Prompt Buttons
+    document.querySelectorAll('.quick-prompt-action').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const prompt = btn.dataset.prompt;
+        if (prompt) {
+          sendMessage(prompt);
+        }
+      });
+    });
 
     chatForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -308,4 +348,5 @@
   });
 </script>
 
+<%- include('partials/bottom-nav', { activeTab: 'tutor' }) %>
 <%- include('partials/footer') %>
