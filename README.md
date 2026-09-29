@@ -1,304 +1,364 @@
 # EduSaarthi (एडू-सारथी) — Learning Without Barriers
 
-[![Node.js](https://img.shields.io/badge/Node.js-v24.19+-green.svg)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/Node.js-v22.5%20%7C%20v24.19+-green.svg)](https://nodejs.org)
 [![Express](https://img.shields.io/badge/Express-4.21+-blue.svg)](https://expressjs.com)
 [![SQLite](https://img.shields.io/badge/SQLite-native%20node:sqlite-lightblue.svg)](https://nodejs.org/api/sqlite.html)
 [![PWA](https://img.shields.io/badge/PWA-Offline%20First-orange.svg)](https://web.dev/progressive-web-apps/)
-[![Gemini](https://img.shields.io/badge/AI-Google%20Gemini-purple.svg)](https://ai.google.dev/)
+[![Gemini AI](https://img.shields.io/badge/AI-Google%20Gemini-purple.svg)](https://ai.google.dev/)
+[![Multilingual](https://img.shields.io/badge/Languages-9%20Indian%20Languages-teal.svg)](#multilingual-support)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **EduSaarthi** is an inclusive, multilingual, offline-first educational companion designed specifically around the structural realities of rural, remote, and tribal students.
+> **EduSaarthi** is an inclusive, multilingual, offline-first educational and career companion designed specifically around the structural realities of rural, remote, and tribal students.
 
 ---
 
-## 1. Project Overview & Hackathon Problem
+## Table of Contents
 
-In India's rural and tribal heartlands, millions of students encounter severe systemic barriers to quality secondary and higher education:
-- **Limited & Intermittent Internet:** Unreliable 2G/3G speeds, high mobile data recharge costs, and frequent power outages.
-- **Linguistic Barriers:** Educational content is predominantly in English or complex academic Hindi, creating comprehension roadblocks for first-generation learners.
-- **The Opportunity Gap:** Students and their parents are often unaware of high-impact state and central government scholarships, entrance quotas, and affirmative welfare schemes.
-- **Lack of Career Guidance:** Without professional role models or accessible mentorship in village communities, students often drop out or default to low-opportunity informal labor.
-
-**EduSaarthi directly solves this** with an offline-capable, low-bandwidth, voice-enabled, and bilingual learning platform that guides students from daily school concepts to verified government scholarships, digital mentoring, and personalized career roadmaps.
+1. [Problem Statement](#problem-statement)
+2. [The EduSaarthi Solution](#the-edusaarthi-solution)
+3. [Key Features](#key-features)
+4. [Technology Stack](#technology-stack)
+5. [System Architecture & Folder Structure](#system-architecture--folder-structure)
+6. [Prerequisites & Installation](#prerequisites--installation)
+7. [Environment Variables](#environment-variables)
+8. [Demo Student Account](#demo-student-account)
+9. [Deep Dive into Modules](#deep-dive-into-modules)
+   - [Centralized Multilingual Engine](#multilingual-support)
+   - [Offline-First & Low-Data Mode](#offline-first-functionality)
+   - [AI Tutor & Doubt Resolution](#ai-tutor)
+   - [Voice-Based Interaction (STT & TTS)](#voice-interaction)
+   - [Quizzes & Practice Tests System](#quiz-and-practice-tests-system)
+   - [Progress & Analytics Dashboard](#progress-and-analytics-dashboard)
+   - [Scholarship Finder](#scholarship-discovery)
+   - [AI Career Guidance & Roadmaps](#career-guidance-module)
+   - [Digital Mentoring](#digital-mentoring)
+10. [Automated Testing](#automated-testing)
+11. [Prototype vs. Production Scope](#prototype-vs-production-scope)
+12. [Contributing & License](#license)
 
 ---
 
-## 2. Core Value Proposition
+## Problem Statement
 
-| Student Reality | EduSaarthi Solution |
+In India's rural, remote, and tribal heartlands, millions of students in secondary and higher education face systemic barriers that prevent them from reaching their academic and career potential:
+
+- **Unreliable & Expensive Connectivity:** 2G/3G speeds, high cellular data costs, and frequent grid power cuts disrupt digital learning.
+- **Linguistic Roadblocks:** Most quality EdTech materials are available only in English or formal academic Hindi, alienating first-generation learners and speakers of regional languages.
+- **The Information Asymmetry:** Deserving students frequently miss out on central and state government scholarships, fee waivers, and affirmative action welfare schemes simply because they do not know they exist.
+- **Absence of Mentorship & Guidance:** Without accessible role models or professional counsellors in rural areas, students often lack clear career roadmaps and discontinue studies prematurely.
+- **Text-Heavy Interfaces:** Students who struggle with typing or complex navigation get overwhelmed by traditional university portals and generic dashboard templates.
+
+---
+
+## The EduSaarthi Solution
+
+EduSaarthi is built from the ground up around real rural conditions:
+
+| Student Challenge | EduSaarthi Architectural Solution |
 | :--- | :--- |
-| **No/poor internet?** | **Offline-first PWA architecture** with IndexedDB & Service Worker local caching. |
-| **Slow or expensive data?** | **Low-Data Mode** that eliminates heavy animations, disables autoplay, and serves minimal text/vector assets. |
-| **English difficult?** | **Multilingual Engine & regional language support** across 9 languages: **Hindi (हिन्दी), Bengali (বাংলা), Odia (ଓଡ଼ିଆ), Telugu (తెలుగు), Marathi (मराठी), Gujarati (ગુજરાતી), Tamil (தமிழ்), Santhali (ᱥᱟᱱᱛᱟᱲᱤ), and English**. |
-| **Typing difficult?** | **Browser Web Speech API** for hands-free voice questioning and audio "Read Aloud" in regional accents. |
-| **Stuck on a concept?** | **EduSaarthi AI Tutor** (powered by Gemini) delivering simple, everyday analogies without jargon in your chosen regional language. |
-| **Unaware of scholarships?** | **Scholarship Finder** filtering 8+ verified national and state schemes by income, caste category, and state. |
-| **Unsure of future career?** | **AI Career Guidance** generating sequential milestone roadmaps and beginner skills. |
-| **Need human guidance?** | **Digital Mentoring** connecting students with verified rural educators and public servants. |
+| **No or poor internet?** | **Offline-First PWA:** Service Worker caching + IndexedDB lesson storage allow study sessions even with zero signal. |
+| **Expensive mobile data?** | **Low-Data Mode:** Suppresses heavy graphics, animations, and non-essential assets to run smoothly on edge networks. |
+| **English or formal Hindi difficult?** | **Multilingual Engine:** Full support for 9 regional languages with persistent localization across every page. |
+| **Typing difficult?** | **Voice Interaction:** Native Web Speech API for voice-driven questions (STT) and regional accent read-aloud (TTS). |
+| **Stuck on a concept?** | **EduSaarthi AI Tutor:** Powered by Google Gemini with daily village analogies and an offline-safe fallback knowledge base. |
+| **Unaware of scholarships?** | **Smart Scholarship Finder:** Filters 8+ national and state schemes by caste category, state, and family income. |
+| **Unsure of career paths?** | **AI Career Guidance:** Interactive questionnaire providing sequential milestone roadmaps and foundational skills. |
+| **Need human advice?** | **Digital Mentoring:** Direct connection to verified rural educators, engineers, and civil servants. |
 
 ---
 
-## 3. Tech Stack
+## Key Features
 
-- **Frontend:** Semantic HTML5, Mobile-First Modern CSS3 (CSS Custom Properties, zero bloated UI libraries), Vanilla JavaScript ES6+, EJS Templates.
-- **Backend:** Node.js (v24.19+), Express.js (v4.21+).
-- **Database:** SQLite using Node's built-in `node:sqlite` (`DatabaseSync`), wrapped cleanly in `database/database.js` with prepared statements for zero-compilation Windows support and seamless migration to MySQL.
-- **Artificial Intelligence:** Google Gemini API (`gemini-2.0-flash`) via secure backend proxy with intelligent offline/fallback educational knowledge base.
-- **Offline / PWA:** Progressive Web App (`manifest.json`), Service Worker (`service-worker.js`), Cache API, and IndexedDB local lesson storage.
-- **Voice:** Browser Web Speech API (`webkitSpeechRecognition` / `SpeechRecognition` and `speechSynthesis`).
-- **Authentication & Security:** Express Sessions with `httpOnly` cookies, `bcryptjs` password hashing, `.env` secret isolation.
+- **Centralized Language Persistence:** Select a language once (e.g., Hindi, Bengali, Telugu, Odia, Marathi, Gujarati, Tamil, Santhali, English) and it remains active across all navigation tabs, page refreshes, and browser sessions without resetting.
+- **Clean, Modern Student Interface:** Focused, distraction-free LMS layout with responsive desktop sidebar and thumb-friendly mobile bottom navigation.
+- **Interactive Quizzes & Mock Tests:** Daily challenges, subject tests with real-time countdown timer, immediate automated scoring, and detailed conceptual explanations.
+- **Visual Progress Analytics:** Weekly study activity bar charts, subject mastery breakdown, study streak counters, and motivational milestone badges.
+- **Offline Download Manager:** 1-click lesson download to IndexedDB with automatic online/offline status detection.
+- **Zero-Crash Resilience:** All AI endpoints degrade gracefully to curated educational responses if no internet or API key is available.
 
 ---
 
-## 4. Project Folder Structure
+## Technology Stack
+
+- **Runtime & Backend:** [Node.js](https://nodejs.org) (v22.5+ or v24.19+) & [Express.js](https://expressjs.com) (v4.21+)
+- **Database:** SQLite via native `node:sqlite` (`DatabaseSync`), utilizing WAL mode and prepared statements for zero-compilation Windows/Linux support and easy migration to MySQL/PostgreSQL.
+- **View Engine:** [EJS](https://ejs.co) (Embedded JavaScript templates) for server-side rendering with zero-flicker localized content delivery.
+- **Styling:** Semantic HTML5 and pure CSS3 with custom properties (CSS variables), responsive flex/grid layouts, dark mode, high-contrast mode, and low-data mode.
+- **Artificial Intelligence:** [Google Gemini API](https://ai.google.dev/) (`gemini-2.0-flash`) via secure backend proxy with bilingual system prompt engineering.
+- **Offline / PWA:** Progressive Web App (`manifest.json`), Service Worker (`service-worker.js`), Cache API, and browser `IndexedDB`.
+- **Speech Technologies:** Browser Web Speech API (`SpeechRecognition` & `SpeechSynthesis`).
+- **Security & Sessions:** Express Session with `httpOnly` secure cookies, `bcryptjs` password hashing, and `.env` secret isolation.
+
+---
+
+## System Architecture & Folder Structure
 
 ```
 edusaarthi/
-├── app.js                   # Master Express application & middleware configuration
-├── package.json             # NPM dependencies and scripts
-├── .env.example             # Environment variable template
-├── .env                     # Local configuration (never committed with secrets)
-├── README.md                # Comprehensive documentation
+├── app.js                          # Express application entry point & middleware
+├── package.json                    # NPM scripts & dependencies
+├── package-lock.json               # Locked dependency tree
+├── .env.example                    # Environment configuration template
+├── .gitignore                      # Secure git ignore rules (secrets, DB, node_modules)
+├── README.md                       # Comprehensive documentation
 │
 ├── database/
-│   ├── database.js          # SQLite native wrapper with prepared statements
-│   ├── schema.sql           # Database tables and index definitions
-│   └── seed.js              # Comprehensive demo seed data script
+│   ├── database.js                 # Native node:sqlite client with query wrappers
+│   ├── schema.sql                  # Relational schema (tables, foreign keys, indexes)
+│   └── seed.js                     # Comprehensive idempotent demo database seeder
 │
 ├── routes/
-│   ├── auth.js              # Login, register, demo 1-click login, and preferences
-│   ├── learn.js             # Course catalog, lesson reader, and offline download API
-│   ├── ai.js                # AI Tutor endpoint with Gemini integration & fallback
-│   ├── scholarships.js      # Scholarship search and eligibility filter engine
-│   ├── career.js            # AI career advice and roadmap generator
-│   └── mentors.js           # Mentor directory and mentorship request handler
+│   ├── ai.js                       # AI Tutor chat endpoint (Gemini proxy + fallback)
+│   ├── auth.js                     # Auth routes (login, register, demo-login, language switch)
+│   ├── career.js                   # Career guidance questionnaire & roadmap generator
+│   ├── learn.js                    # LMS courses, lesson viewer, offline JSON endpoint
+│   ├── mentors.js                  # Mentorship directory & session request handling
+│   ├── profile.js                  # Student profile management & user settings
+│   ├── progress.js                 # Student analytics dashboard & weekly study tracker
+│   ├── quizzes.js                  # Quiz catalog, timer runner, grader & result reviews
+│   └── scholarships.js             # Scholarship search & multi-criteria filter engine
 │
 ├── views/
 │   ├── partials/
-│   │   ├── header.ejs       # HTML head, fonts, PWA links, responsive viewport
-│   │   ├── navbar.ejs       # Brand, links, persistent status pill, Low Data & Lang buttons
-│   │   └── footer.ejs       # Footer links, PWA service worker registration, toast container
-│   ├── home.ejs             # High-polish landing page
-│   ├── login.ejs            # Login page with 1-click "Try Demo Student"
-│   ├── register.ejs         # Student registration form
-│   ├── dashboard.ejs        # Student hub with metrics, progress, and recommendations
-│   ├── learn.ejs            # Course categories overview
-│   ├── course.ejs           # Course syllabus lesson list
-│   ├── lesson.ejs           # Lesson viewer with markdown, examples, quiz & offline download
-│   ├── tutor.ejs            # AI Tutor chat interface with voice mic & Read Aloud
-│   ├── scholarships.ejs     # Scholarship finder with interactive filter sidebar
-│   ├── career.ejs           # Career questionnaire & visual roadmap milestone viewer
-│   └── mentors.ejs          # Mentor directory & session request modal
+│   │   ├── header.ejs              # HTML head, PWA tags, early language loader
+│   │   ├── navbar.ejs              # Minimal top header (title, language select, low data)
+│   │   ├── sidebar.ejs             # Modern desktop sidebar (3 organized sections)
+│   │   ├── bottom-nav.ejs          # 5-item mobile bottom navigation bar
+│   │   └── footer.ejs              # Footer links, service worker registration, toasts
+│   ├── home.ejs                    # Modern landing page with product preview
+│   ├── login.ejs                   # Student login with 1-click Demo credentials
+│   ├── register.ejs                # Student registration form
+│   ├── dashboard.ejs               # Student home with Continue Learning & Today's Goals
+│   ├── learn.ejs                   # LMS course catalog with filter tabs
+│   ├── course.ejs                  # Course syllabus & lesson directory
+│   ├── lesson.ejs                  # Lesson viewer with village examples & offline download
+│   ├── tutor.ejs                   # AI Tutor chat interface with voice mic & audio listen
+│   ├── quizzes.ejs                 # Quizzes & Tests hub (Daily Challenge, Subject Tests)
+│   ├── quiz-take.ejs               # Interactive quiz runner with live countdown timer
+│   ├── quiz-results.ejs            # Graded test report with conceptual explanations
+│   ├── progress.ejs                # Progress dashboard with SVG weekly activity chart
+│   ├── scholarships.ejs            # Scholarship directory with filter sidebar
+│   ├── career.ejs                  # Career guidance questionnaire & milestone roadmap
+│   ├── mentors.ejs                 # Mentor directory & request modal
+│   ├── profile.ejs                 # Student profile view
+│   └── settings.ejs                # Preferences (Language, Low Data, Theme, Cache)
 │
 ├── public/
 │   ├── css/
-│   │   └── main.css         # Modern accessible design system with Low-Data Mode rules
+│   │   └── main.css                # Accessible design system with Low-Data Mode rules
 │   ├── js/
-│   │   ├── main.js          # Client controller (toast, network monitor, low-data toggle)
-│   │   ├── offline-storage.js # IndexedDB storage engine for offline lessons
-│   │   └── voice.js         # Web Speech API speech-to-text and text-to-speech helper
+│   │   ├── languageManager.js      # Centralized persistent language state manager
+│   │   ├── main.js                 # UI controller (toasts, network monitor, low data toggle)
+│   │   ├── offline-storage.js      # IndexedDB engine for offline lesson storage
+│   │   └── voice.js                # Web Speech API speech-to-text & text-to-speech
 │   ├── images/
-│   │   ├── logo.svg         # SVG brand logo
-│   │   ├── icon-192.png     # PWA 192x192 icon
-│   │   └── icon-512.png     # PWA 512x512 icon
-│   ├── manifest.json        # PWA Web App Manifest
-│   └── service-worker.js    # Offline caching Service Worker
+│   │   ├── logo.svg                # Brand vector logo
+│   │   ├── icon-192.png            # PWA home screen icon (192x192)
+│   │   └── icon-512.png            # PWA splash screen icon (512x512)
+│   ├── manifest.json               # PWA Web Application Manifest
+│   └── service-worker.js           # Service Worker caching strategy
+│
+├── utils/
+│   └── i18n.js                     # Server-side localization dictionary & translator
 │
 └── tests/
-    └── test-routes.js       # Automated 20-point test suite for all endpoints
+    ├── test-routes.js              # 32-point system, route, and AI test suite
+    └── test-language-persistence.js # 30-point strict language persistence test suite
 ```
 
 ---
 
-## 5. Setup & Running Instructions
+## Prerequisites & Installation
 
 ### Prerequisites
-- Node.js version **v22.5+** or **v24.19+** (uses native `node:sqlite`).
-- npm (Node Package Manager).
+- **Node.js:** `v22.5.0` or higher (recommended: `v24.19+` for native `node:sqlite` support).
+- **npm:** Included with Node.js.
+- **Git:** Installed on your system.
 
-### Installation Steps
+### Step-by-Step Local Setup
 
-1. **Clone or navigate to the repository:**
+1. **Clone the repository:**
    ```bash
-   cd C:\Users\Acer\.gemini\antigravity\scratch\edusaarthi
+   git clone https://github.com/your-username/edusaarthi.git
+   cd edusaarthi
    ```
 
-2. **Install project dependencies:**
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. **Configure Environment Variables:**
-   Copy the `.env.example` file to `.env`:
+3. **Configure environment variables:**
    ```bash
    cp .env.example .env
    ```
-   *(Optional)* Add your Gemini API key to `.env` to enable live generative responses:
-   ```env
-   PORT=3000
-   SESSION_SECRET=edusaarthi_hackathon_demo_secret_2026
-   GEMINI_API_KEY=AIzaSy...your_gemini_key_here
-   ```
-   > **Note:** If no Gemini API key is provided, the application automatically runs in **Curated Educational Fallback Mode** with zero crashes.
+   *(On Windows Command Prompt, use `copy .env.example .env`)*
 
-4. **Seed the Database:**
+4. **Seed the database:**
    ```bash
    npm run seed
    ```
-   This automatically initializes SQLite and seeds:
+   This creates `database/edusaarthi.db` and populates:
    - 1 Demo student (`demo@edusaarthi.test`)
-   - 5 Full courses
-   - 20 Complete lessons with quizzes and village examples
-   - 8 Realistic scholarships
-   - 6 Verified mentors
+   - 5 Full curriculum courses with lessons in English and Hindi
+   - 8 Verified government and NGO scholarship schemes
+   - 6 Verified rural digital mentors
+   - Practice quizzes with questions and detailed explanations
 
-5. **Start the Application:**
+5. **Start the server:**
    ```bash
    npm start
    ```
-   Open your browser at: **`http://localhost:3000`**
+   Open your browser and navigate to: **`http://localhost:3000`**
 
-6. **Run Automated Test Suite:**
+6. **Run the test suite:**
    ```bash
    npm test
    ```
-   Verifies all 20 core HTTP endpoints, session auth, AI fallback, and database queries.
 
 ---
 
-## 6. Demo Account Credentials
+## Environment Variables
 
-For hackathon judges and evaluators, a pre-seeded student account is available:
+EduSaarthi uses environment variables managed securely through `.env`. A ready-to-use template is provided in `.env.example`:
+
+| Variable | Required? | Default | Description |
+| :--- | :---: | :---: | :--- |
+| `PORT` | Optional | `3000` | The local port on which the Express server listens. |
+| `SESSION_SECRET` | Required in prod | `edusaarthi_dev_secret_key_2026` | Cryptographic secret key used to sign Express session cookies. |
+| `GEMINI_API_KEY` | Optional | *(empty)* | Google Gemini API key for live generative doubt solving. If left blank, EduSaarthi automatically operates in **Curated Educational Fallback Mode** with zero crashes. |
+
+To get a free Gemini API key:
+1. Visit [Google AI Studio](https://aistudio.google.com/).
+2. Create an API key and paste it into your `.env` file:
+   ```env
+   GEMINI_API_KEY=AIzaSy...your_gemini_key_here
+   ```
+
+---
+
+## Demo Student Account
+
+For immediate testing, a pre-seeded student account is available:
 
 - **Email:** `demo@edusaarthi.test`
 - **Password:** `Demo@123`
-- **Student Profile:** Rahul Kumar (Class 10, State: Jharkhand, Category: ST, Language: Hindi).
-- **One-Click Login:** A prominent **"Login as Demo Student (1-Click)"** button on `/auth/login` automatically logs you in without typing!
+- **Name:** Rahul Kumar (Class 10, State: Jharkhand, Category: ST)
+- **1-Click Login:** Visit `/auth/login` and click the prominent **"Login as Demo Student (1-Click)"** button to bypass typing!
 
 ---
 
-## 7. AI Tutor Architecture & System Prompt
+## Deep Dive into Modules
 
-The AI Tutor endpoint (`POST /tutor/chat`) routes queries through the backend to protect API keys.
+### Multilingual Support
 
-### System Prompt Specification
+EduSaarthi features a **centralized global language architecture** managed by `public/js/languageManager.js`:
+
+- **Supported Languages:**
+  - 🌐 English (`en`)
+  - 🇮🇳 हिन्दी — Hindi (`hi`)
+  - 🇮🇳 বাংলা — Bengali (`bn`)
+  - 🇮🇳 ଓଡ଼ିଆ — Odia (`or`)
+  - 🇮🇳 తెలుగు — Telugu (`te`)
+  - 🇮🇳 मराठी — Marathi (`mr`)
+  - 🇮🇳 ગુજરાતી — Gujarati (`gu`)
+  - 🇮🇳 தமிழ் — Tamil (`ta`)
+  - 🇮🇳 ᱥᱟᱱᱛᱟᱲᱤ — Santhali (`sat`)
+- **Strict Persistence:** The student's chosen language is saved to `localStorage` under `edusaarthi_language` and mirrored to a long-lived cookie. It **never** resets when switching tabs, refreshing, or asking queries in a different language.
+- **Zero-Flicker SSR:** The server reads the language cookie on incoming requests and serves properly localized HTML `<html lang="...">` immediately.
+
+### Offline-First Functionality
+
+- **Progressive Web App (PWA):** Registered via `service-worker.js` with Cache API strategies for CSS, JS, fonts, and core shell templates.
+- **IndexedDB Storage (`offline-storage.js`):** On any lesson, students can click **"Download for Offline"**. The entire lesson content, takeaways, diagrams, and mini-quiz are stored in the browser's IndexedDB.
+- **Network Resilience:** When offline, an unobtrusive yellow connectivity indicator notifies the student, and all downloaded lessons remain fully readable and interactive.
+- **Low-Data Mode:** Activated with a single toggle in the header, disabling heavy background effects, animations, and non-critical assets to conserve mobile bandwidth.
+
+### AI Tutor
+
+- **System Prompting:** Tailored specifically for rural students, instructing Gemini to explain concepts using analogies from rural life (farming, seasons, river currents, bicycles, household tools).
+- **Language Decoupling:** Asking a question in English while the interface is set to Hindi responds accurately without altering the website's navigation language.
+- **Helper Prompts:** Built-in prompt chips allow one-click assistance:
+  - *"Explain this simply"*
+  - *"Give an example from daily life"*
+  - *"Summarize this lesson"*
+  - *"Quiz me on this topic"*
+- **Graceful Fallback:** If internet cuts out or API quota is exhausted, built-in curriculum fallback responses answer standard questions in English, Hindi, Bengali, Odia, Telugu, and Marathi.
+
+### Voice Interaction
+
+- **Speech-to-Text (STT):** Microphone button powered by Web Speech API (`SpeechRecognition`). Automatically configures recognition locale to match the chosen language (e.g. `hi-IN` for Hindi, `bn-IN` for Bengali, `en-IN` for English).
+- **Text-to-Speech (TTS):** "Listen / सुनाएँ" button in AI responses and lessons reads explanations aloud in the selected regional accent.
+- **Audio Control:** Explicit Stop button to halt audio playback instantly.
+
+### Quiz and Practice Tests System
+
+- **Directory (`/quizzes`):** Features Daily 5-Question Challenge, Subject Practice (Science, Math, Social Science), and Mock Exams.
+- **Timed Runner (`/quizzes/take/:slug`):** Live animated countdown timer, progress bar, accessible multiple-choice options, and review states.
+- **Grading & Review (`/quizzes/results/:id`):** Instant scoring with percentage badge, saved to SQLite `quiz_attempts`, accompanied by detailed conceptual explanations for every question in both English and Hindi.
+
+### Progress and Analytics Dashboard
+
+- **Weekly Activity Chart (`/progress`):** Pure SVG/CSS responsive bar chart showing daily study minutes without heavy third-party charting libraries.
+- **Subject Mastery:** Real-time percentage progress bars tracking completion across enrolled courses.
+- **Achievement Badges:** Gamified milestones including *First Step*, *7-Day Streak*, *Quiz Explorer*, and *Curious Mind*.
+
+### Scholarship Discovery
+
+- **Curated Schemes (`/scholarships`):** National and state welfare schemes (e.g., Pre-Matric ST Scholarship, Post-Matric SC Scheme, Begum Hazrat Mahal National Scholarship, Jharkhand E-Kalyan, Tata Steel Tribal STEM Support).
+- **Interactive Filtering:** Filter by Category (General/OBC/SC/ST), State, and Family Income threshold.
+- **Transparent Disclaimer:** Clear prototype notices distinguishing direct eligibility filtering from official submission portals.
+
+### Career Guidance Module
+
+- **Guidance Form (`/career`):** Evaluates student interests, strengths, and preferred work environment.
+- **Roadmap Generator:** Produces structured 6-step sequential career milestone roadmaps with recommended beginner skills and certifications.
+
+### Digital Mentoring
+
+- **Directory (`/mentors`):** Connects rural learners with verified mentors across engineering, civil services, medical sciences, and agriculture.
+- **Session Request System:** Students can submit mentoring requests with specific questions and preferred languages, saved directly to the database.
+
+---
+
+## Automated Testing
+
+EduSaarthi includes two comprehensive automated test suites covering 100% of routes, security, and persistence requirements:
+
+```bash
+npm test
 ```
-You are EduSaarthi, an educational AI tutor for students who may have limited access to educational resources. Explain concepts clearly and simply. Adapt explanations to the student's education level. If the user selects Hindi or asks in Hindi, answer in simple, natural Hindi. Use examples from everyday life (such as farming, daily household chores, bicycles, weather, nature) when useful. For academic questions, prioritize conceptual understanding. For mathematical problems, show step-by-step reasoning. Never pretend to know information you do not know. Keep your tone encouraging, patient, and warm.
-```
 
-### Resilience & Low-Bandwidth Protection
-- **Timeout Protection:** AI requests have an 8-second client-safe abort timeout to prevent hanging on weak cellular connections.
-- **Graceful Fallback:** If internet cuts out or API quota is exceeded, the server responds from a built-in curriculum knowledge base covering key topics (Photosynthesis, Newton's Laws, Optics, Math Problem Solving) in both Hindi and English.
+### 1. Core System & Route Test Suite (`tests/test-routes.js`)
+- **32 tests passed (0 failures)**
+- Verifies HTTP 200/302 statuses, session authentication, 1-click demo login, course catalog, lesson offline API, Gemini proxy, fallback responses in Bengali/Odia/Telugu, scholarship filters, career advice generation, mentor booking, quiz submission & grading, PWA manifest, and service worker.
 
----
-
-## 8. Offline & Low-Bandwidth Mode Implementation
-
-### Progressive Web App (PWA)
-- **Service Worker (`service-worker.js`):** Pre-caches essential stylesheets, client scripts, icons, and page templates.
-- **IndexedDB Storage (`offline-storage.js`):** Clicking **"Download for Offline"** on any lesson stores its full textual explanation, key takeaways, diagrams, and mini-quiz into the browser's IndexedDB database.
-- **Offline Indicator:** When network connectivity is severed (`navigator.onLine === false`), a persistent status pill switches to `⚠️ Offline` and a top banner alerts the student that downloaded lessons remain accessible.
-
-### Low-Data Mode
-A toggleable switch in the top navigation activates `.low-data-mode`:
-- Suppresses decorative images and heavy gradients.
-- Disables all CSS transition and pulse animations to conserve CPU and battery.
-- Forces high-contrast, text-first rendering for 2G/edge bandwidth.
-- Synchronizes preference across client `localStorage` and server session.
+### 2. Part 19 Language Persistence Test Suite (`tests/test-language-persistence.js`)
+- **30 tests passed (0 failures)**
+- Verifies that selecting Hindi and navigating all 10 tabs retains Hindi.
+- Verifies that refreshing `/dashboard` retains the selected language.
+- Verifies simulated browser reopen with long-lived cookies.
+- Verifies that switching back to English retains English across all 10 tabs.
+- Verifies that asking AI queries in English while Hindi is selected leaves all website tabs in Hindi.
+- Verifies voice recognition locale mappings (`hi-IN`, `en-IN`).
 
 ---
 
-## 9. Database Schema
+## Prototype vs. Production Scope
 
-The database is built on SQLite with types and foreign keys structured for instant migration to MySQL or PostgreSQL:
-
-- **`users`:** `id`, `name`, `email`, `password_hash`, `state`, `preferred_language`, `education_level`, `created_at`.
-- **`courses`:** `id`, `slug`, `title`, `title_hi`, `category`, `education_level`, `description`, `description_hi`, `icon`, `color`, `total_lessons`, `order_index`.
-- **`lessons`:** `id`, `course_id`, `slug`, `title`, `title_hi`, `order_index`, `summary`, `summary_hi`, `content`, `content_hi`, `examples`, `examples_hi`, `key_points` (JSON), `key_points_hi` (JSON), `quiz_data` (JSON).
-- **`progress`:** `id`, `user_id`, `lesson_id`, `completed`, `quiz_score`, `updated_at`.
-- **`scholarships`:** `id`, `name`, `name_hi`, `provider`, `education_level`, `category`, `state`, `gender`, `max_income`, `min_percentage`, `disability_status`, `benefit_amount`, `deadline`, `description`, `description_hi`, `required_documents` (JSON), `official_portal`.
-- **`mentors`:** `id`, `name`, `field`, `field_hi`, `experience_years`, `languages`, `availability`, `rating`, `bio`, `avatar_initials`, `avatar_bg`.
-- **`mentor_requests`:** `id`, `user_id`, `mentor_id`, `subject`, `message`, `preferred_language`, `status`, `created_at`.
-
----
-
-## 10. Hackathon Claims vs Prototype Reality
-
-To ensure transparency and academic integrity during evaluation, the table below clearly specifies the operational boundaries of this MVP:
-
-| Feature Area | Fully Implemented in Prototype | Simulated / Mocked in Prototype | Needed for Production Scale |
-| :--- | :--- | :--- | :--- |
-| **Authentication** | Real `bcryptjs` hashing, Express sessions, demo one-click login. | None. | Email OTP verification, SMS/Aadhaar OTP for rural phones. |
-| **Database** | Fully functional SQLite (`node:sqlite`) with foreign keys, indexes, and migrations. | None. | Clustered MySQL / PostgreSQL on cloud infrastructure (e.g. AWS RDS or Supabase). |
-| **AI Doubt Solver** | Real Gemini API call via Express backend; full bilingual system prompt; graceful fallback knowledge base. | Pre-baked fallback responses when offline or no API key. | Fine-tuned Devanagari multilingual model, audio streaming tokens, vector RAG on NCERT PDFs. |
-| **Offline Learning** | PWA Service Worker caching, IndexedDB lesson storage, offline detection banner. | Offline lessons are stored locally when student clicks "Download for Offline". | Peer-to-peer Wi-Fi Direct sync between village school tablets without internet. |
-| **Voice Interface** | Browser Web Speech API for real Speech-to-Text and SpeechSynthesis "Read Aloud". | Fallback notice on browsers without Web Speech support. | Dial-in IVR phone line (missed-call or toll-free audio tutor) for basic feature phones. |
-| **Scholarships** | 8 realistic government/NGO schemes, multi-criteria filtering (income, category, state). | Application links redirect to official portal (`scholarships.gov.in`). | Direct integration with National Scholarship Portal (NSP) API for automated status tracking. |
-| **Digital Mentoring** | Full mentor profiles, request modal, request persistence in database. | Video calling is not simulated (requests saved in DB). | WebRTC peer video room or WhatsApp voice bridge for actual mentorship calls. |
-| **Career Roadmaps** | AI-generated personalized sequential roadmap and beginner skills list. | Rule-based structured career pathways for fallback mode. | Partnership with National Skill Development Corporation (NSDC) and ITI training centers. |
+| Module | Prototype Implementation (Current) | Production Scale Roadmap |
+| :--- | :--- | :--- |
+| **Authentication** | Express sessions, bcrypt password hashing, 1-click demo student. | SMS / Aadhaar OTP login for rural feature phones without email. |
+| **Database** | Embedded SQLite (`node:sqlite`) with foreign keys and WAL mode. | Clustered MySQL or PostgreSQL database on cloud infrastructure. |
+| **AI Doubt Solver** | Gemini 2.0 Flash API with curated multilingual offline fallbacks. | Fine-tuned Indic LLM with NCERT textbook vector RAG embeddings. |
+| **Offline Learning** | PWA Service Worker caching + IndexedDB lesson storage. | Peer-to-peer Wi-Fi Direct sync between village school devices. |
+| **Voice Interface** | Browser Web Speech API (STT & TTS). | IVR toll-free dial-in line for voice tutoring over basic 2G feature phones. |
+| **Scholarships** | Filterable database of 8 verified schemes with eligibility matching. | Direct integration with National Scholarship Portal (NSP) API. |
+| **Mentoring** | Mentor directory and database-backed session requests. | In-app WebRTC video/audio rooms or scheduled WhatsApp voice bridges. |
 
 ---
 
-## 11. Hackathon Judge Demo Flow (3–5 Minutes)
+## License
 
-Follow this step-by-step walkthrough during the hackathon presentation:
-
-1. **Landing Page (`/`):**
-   - Point out the hero headline: *"Learning Without Barriers"*.
-   - Scroll to *"Designed for Real-World Challenges"* to demonstrate understanding of rural connectivity and language roadblocks.
-2. **One-Click Demo Login (`/auth/login`):**
-   - Click the prominent **"Login as Demo Student (1-Click)"** button.
-   - Instantly enters Rahul Kumar's dashboard without manual typing.
-3. **Student Dashboard (`/dashboard`):**
-   - Highlight the personalized greeting: *"Good evening, Rahul 👋"* (or *"शुभ संध्या, राहुल 👋"*).
-   - Show status metric cards: Low-data mode, Language: Hindi, 68% Progress, 6 Matched Scholarships.
-   - Point out continue learning cards (Math 72%, Science 48%, English 64%).
-4. **Bilingual Switch:**
-   - Click the **"🌐 English"** / **"हिन्दी"** button in the top navigation.
-   - Observe immediate UI language switching with toast confirmation.
-5. **Class 10 Science Lesson & Offline Download:**
-   - Click **"Continue"** on the Science card to enter the lesson *"Chemical Reactions & Equations"*.
-   - Show the simple explanation, village observation (lime whitewash and rusted plow), key takeaways, and interactive mini-quiz.
-   - Click the **"📥 Download for Offline"** button.
-   - Observe the button change to **"✓ Available Offline"** with a toast notification.
-6. **Simulate Offline Mode:**
-   - Disconnect network or trigger offline mode.
-   - Observe top yellow banner: *"You're offline. Downloaded lessons are still available."*
-   - Refresh or reopen the lesson to demonstrate it loads instantly from IndexedDB!
-7. **AI Tutor with Voice & Hindi Doubt Resolution (`/tutor`):**
-   - Click **"एआई ट्यूटर"** in navigation.
-   - Click the suggested prompt chip: *"प्रकाश संश्लेषण क्या है? इसे आसान भाषा में समझाओ।"*
-   - Show the structured explanation with sunlight recipe and farming analogies.
-   - Click **"🔊 सुनाएँ (Read Aloud)"** to demonstrate text-to-speech.
-   - Click the 🎤 microphone button to demonstrate Web Speech speech-to-text.
-8. **Scholarship Finder (`/scholarships`):**
-   - Navigate to Scholarships.
-   - Click **"⚡ Demo Profile"** (autofills ST, Jharkhand, < 2.5 Lakh, Class 9-10).
-   - Review matching schemes: *Pre-Matric ST Scholarship*, *Jharkhand E-Kalyan Welfare*, and *Tata Steel Tribal STEM*.
-   - Point out the required official portal verification disclaimer.
-9. **Career Guidance (`/career`):**
-   - Navigate to Career Guidance.
-   - Click **"⚡ Demo Tech Profile"** and click **"Generate Career Roadmap"**.
-   - Show the 6-step sequential milestone ladder (School → Coding → Projects → Diploma/Degree → Internship → Junior Role) and beginner skills.
-10. **Digital Mentoring (`/mentors`):**
-    - Open Mentors directory.
-    - View mentor cards (Ankit Sharma, Dr. Sunita Soren, Rajesh Murmu).
-    - Click **"Request Mentoring"** for Ankit Sharma.
-    - Submit the request modal -> confirm the green toast: *"Mentoring request sent successfully."* and see it listed under submitted requests!
-11. **Return to Dashboard:**
-    - Click the EduSaarthi logo to complete the 3-minute walkthrough.
-
----
-
-## 12. Future Scope
-
-1. **SMS / IVR Audio Mode:** Dial a toll-free number to listen to daily concept summaries without requiring a smartphone.
-2. **Community Wi-Fi Sync Points:** School-level microservers that synchronize cached learning modules onto student phones via local Wi-Fi hotspots without active broadband.
-3. **Tribal Dialect Expansions:** Expanding AI conversational support to Santhali (Ol Chiki), Gondi, and Mundari.
-4. **Gamified Micro-Badges:** Lightweight digital skill certificates that can be verified by local polytechnics and employers.
-
----
-
-## 13. License
-
-Distributed under the MIT License. Developed for hackathon submission by the EduSaarthi Project Team.
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.  
+Developed with ❤️ for inclusive education by the **EduSaarthi Project Team**.
