@@ -1,7 +1,10 @@
 <%- include('partials/header', { pageTitle: (lang === 'hi') ? lesson.title_hi : lesson.title }) %>
 <%- include('partials/navbar', { activeTab: 'learn' }) %>
 
-<main class="container" style="padding-top: 1.5rem; padding-bottom: 4rem;">
+<div class="app-layout">
+  <%- include('partials/sidebar', { activeTab: 'learn' }) %>
+
+  <main class="app-content">
   <!-- Breadcrumbs & Offline Controls -->
   <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
     <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-muted);">
@@ -200,10 +203,13 @@
           downloadBtn.disabled = false;
           if (downloadText) downloadText.textContent = '<%= (lang === "hi") ? "पुनः प्रयास करें" : "Retry Download" %>';
           window.showToast('Failed to download lesson. Check network.', 'error');
-        }
       });
     }
   });
 </script>
 
+  </main>
+</div>
+
+<%- include('partials/bottom-nav', { activeTab: 'learn' }) %>
 <%- include('partials/footer') %>

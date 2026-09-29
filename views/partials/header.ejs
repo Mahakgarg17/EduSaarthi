@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<%= lang || 'hi' %>">
+<html lang="<%= lang || 'en' %>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
@@ -20,27 +20,30 @@
   <!-- Core Design System CSS -->
   <link rel="stylesheet" href="/css/main.css">
 
-  <!-- Early Language & Theme State Initialization (Prevents Flashing) -->
+  <!-- Centralized Language Manager Loaded Early in Head -->
+  <script src="/js/languageManager.js"></script>
+
+  <!-- Early Theme & Language Alignment Script (Guards against language reset) -->
   <script>
     (function() {
       try {
         var savedLang = localStorage.getItem('edusaarthi_language');
+        if (!savedLang) {
+          savedLang = 'en';
+          localStorage.setItem('edusaarthi_language', 'en');
+        }
+
         var cookieMatch = document.cookie.match(/(?:^|;\s*)edusaarthi_language=([^;]*)/);
         var cookieLang = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
-        var docLang = document.documentElement.getAttribute('lang') || 'hi';
+        if (cookieLang !== savedLang) {
+          document.cookie = "edusaarthi_language=" + encodeURIComponent(savedLang) + "; path=/; max-age=31536000; SameSite=Lax";
+        }
 
-        if (savedLang) {
-          if (cookieLang !== savedLang) {
-            document.cookie = "edusaarthi_language=" + encodeURIComponent(savedLang) + "; path=/; max-age=31536000; SameSite=Lax";
-          }
-          if (docLang !== savedLang) {
-            window.location.reload();
-          }
-        } else {
-          localStorage.setItem('edusaarthi_language', docLang);
-          if (!cookieLang) {
-            document.cookie = "edusaarthi_language=" + encodeURIComponent(docLang) + "; path=/; max-age=31536000; SameSite=Lax";
-          }
+        var docLang = document.documentElement.getAttribute('lang') || 'en';
+        // Only reload if the rendered language genuinely differs from user's saved choice
+        if (docLang !== savedLang && !sessionStorage.getItem('__lang_reloaded_' + savedLang)) {
+          sessionStorage.setItem('__lang_reloaded_' + savedLang, '1');
+          window.location.reload();
         }
 
         // Theme check

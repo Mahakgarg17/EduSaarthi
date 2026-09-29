@@ -38,7 +38,8 @@ router.post('/login', async (req, res) => {
       education_level: user.education_level,
       preferred_language: user.preferred_language
     };
-    req.session.lang = user.preferred_language || req.session.lang || 'hi';
+    const existingCookie = req.headers && req.headers.cookie ? (req.headers.cookie.match(/(?:^|;\s*)edusaarthi_language=([^;]*)/) ? decodeURIComponent(req.headers.cookie.match(/(?:^|;\s*)edusaarthi_language=([^;]*)/)[1]) : null) : null;
+    req.session.lang = existingCookie || user.preferred_language || 'en';
     res.cookie('edusaarthi_language', req.session.lang, { maxAge: 365 * 24 * 60 * 60 * 1000, httpOnly: false, sameSite: 'lax', path: '/' });
 
     return res.redirect('/dashboard');
@@ -56,6 +57,7 @@ router.post('/demo-login', async (req, res) => {
       return res.render('login', { error: 'Demo account not initialized. Please run seed script.' });
     }
 
+    const existingCookie = req.headers && req.headers.cookie ? (req.headers.cookie.match(/(?:^|;\s*)edusaarthi_language=([^;]*)/) ? decodeURIComponent(req.headers.cookie.match(/(?:^|;\s*)edusaarthi_language=([^;]*)/)[1]) : null) : null;
     req.session.user = {
       id: demoUser.id,
       name: demoUser.name,
@@ -64,7 +66,7 @@ router.post('/demo-login', async (req, res) => {
       education_level: demoUser.education_level,
       preferred_language: demoUser.preferred_language
     };
-    req.session.lang = demoUser.preferred_language || 'hi';
+    req.session.lang = existingCookie || demoUser.preferred_language || 'en';
     res.cookie('edusaarthi_language', req.session.lang, { maxAge: 365 * 24 * 60 * 60 * 1000, httpOnly: false, sameSite: 'lax', path: '/' });
 
     return res.redirect('/dashboard');
@@ -112,7 +114,8 @@ router.post('/register', async (req, res) => {
       education_level: education_level || 'Class 10',
       preferred_language: preferred_language || 'hi'
     };
-    req.session.lang = preferred_language || 'hi';
+    const existingCookie = req.headers && req.headers.cookie ? (req.headers.cookie.match(/(?:^|;\s*)edusaarthi_language=([^;]*)/) ? decodeURIComponent(req.headers.cookie.match(/(?:^|;\s*)edusaarthi_language=([^;]*)/)[1]) : null) : null;
+    req.session.lang = preferred_language || existingCookie || 'en';
     res.cookie('edusaarthi_language', req.session.lang, { maxAge: 365 * 24 * 60 * 60 * 1000, httpOnly: false, sameSite: 'lax', path: '/' });
 
     // Initialize user_settings

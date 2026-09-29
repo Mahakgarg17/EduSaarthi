@@ -29,40 +29,28 @@ window.showToast = function (message, type = 'info') {
     toast.style.transform = 'translateY(10px)';
     toast.style.transition = 'all 0.3s ease';
     setTimeout(() => toast.remove(), 300);
-// Centralized Persistent Language Manager
-window.EduSaarthiLanguage = {
-  get() {
-    return localStorage.getItem('edusaarthi_language') || document.documentElement.getAttribute('lang') || 'hi';
-  },
-  async set(lang) {
-    if (!lang) return;
-    localStorage.setItem('edusaarthi_language', lang);
-    document.cookie = 'edusaarthi_language=' + encodeURIComponent(lang) + '; path=/; max-age=31536000; SameSite=Lax';
-
-    try {
-      await fetch('/auth/set-language', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lang })
-      });
-    } catch (e) {
-      console.warn('Language server sync error:', e);
-    }
-
-    if (window.showToast) {
-      window.showToast('Language updated.', 'success');
-    }
-    setTimeout(() => {
-      window.location.reload();
-    }, 150);
-  }
-};
+// Global Language Manager is loaded from /js/languageManager.js
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Mobile Menu Toggle
+  // 1. Mobile Sidebar & Menu Toggle
+  const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+  const appSidebar = document.querySelector('.app-sidebar');
+
+  if (mobileSidebarToggle && appSidebar) {
+    mobileSidebarToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      appSidebar.classList.toggle('mobile-open');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (appSidebar.classList.contains('mobile-open') && !appSidebar.contains(e.target) && e.target !== mobileSidebarToggle) {
+        appSidebar.classList.remove('mobile-open');
+      }
+    });
+  }
+
   const hamburgerBtn = document.getElementById('hamburger-btn');
   const navLinks = document.getElementById('nav-links');
-
   if (hamburgerBtn && navLinks) {
     hamburgerBtn.addEventListener('click', () => {
       navLinks.classList.toggle('mobile-open');
@@ -71,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2. Low-Bandwidth Mode Management
   const lowDataToggle = document.getElementById('low-data-toggle');
+  const sidebarLowDataToggle = document.getElementById('sidebar-low-data-toggle');
   const lowDataStatusPill = document.getElementById('low-data-status-pill');
 
   function setLowDataMode(enabled, notify = true) {
@@ -80,6 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
         lowDataToggle.classList.add('active');
         lowDataToggle.setAttribute('aria-pressed', 'true');
         const textSpan = lowDataToggle.querySelector('.toggle-text');
+        if (textSpan) textSpan.textContent = 'Low Data: ON';
+      }
+      if (sidebarLowDataToggle) {
+        sidebarLowDataToggle.classList.add('active');
+        const textSpan = sidebarLowDataToggle.querySelector('.sidebar-ctrl-text');
         if (textSpan) textSpan.textContent = 'Low Data: ON';
       }
       if (lowDataStatusPill) {
@@ -94,7 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
         lowDataToggle.classList.remove('active');
         lowDataToggle.setAttribute('aria-pressed', 'false');
         const textSpan = lowDataToggle.querySelector('.toggle-text');
-        if (textSpan) textSpan.textContent = 'Low Data: OFF';
+        if (textSpan) textSpan.textContent = 'Low Data';
+      }
+      if (sidebarLowDataToggle) {
+        sidebarLowDataToggle.classList.remove('active');
+        const textSpan = sidebarLowDataToggle.querySelector('.sidebar-ctrl-text');
+        if (textSpan) textSpan.textContent = 'Low Data Mode';
       }
       if (lowDataStatusPill) {
         lowDataStatusPill.className = 'status-badge';
@@ -120,6 +119,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (lowDataToggle) {
     lowDataToggle.addEventListener('click', () => {
+      const isCurrentlyActive = document.body.classList.contains('low-data-mode');
+      setLowDataMode(!isCurrentlyActive, true);
+    });
+  }
+
+  if (sidebarLowDataToggle) {
+    sidebarLowDataToggle.addEventListener('click', () => {
       const isCurrentlyActive = document.body.classList.contains('low-data-mode');
       setLowDataMode(!isCurrentlyActive, true);
     });

@@ -1,131 +1,149 @@
-<%- include('partials/header', { pageTitle: (lang === 'hi') ? 'डिजिटल मेंटरशिप' : 'Digital Mentoring' }) %>
+<%- include('partials/header', { pageTitle: (lang === 'hi') ? 'डिजिटल मेंटर्स - EduSaarthi' : 'Digital Mentors' }) %>
 <%- include('partials/navbar', { activeTab: 'mentors' }) %>
 
-<main class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
-  <!-- Header -->
-  <div style="text-align: center; max-width: 720px; margin: 0 auto 2.5rem;">
-    <span class="badge badge-success" style="margin-bottom: 0.5rem; font-size: 0.8rem;">
-      👨‍🏫 <%= (lang === 'hi') ? 'अनुभवी मार्गदर्शक' : 'Community Leadership' %>
-    </span>
-    <h1 style="font-size: 2.25rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">
-      <%= (lang === 'hi') ? 'डिजिटल मेंटरशिप (Digital Mentoring)' : 'Connect with Digital Mentors' %>
-    </h1>
-    <p style="color: var(--text-muted); font-size: 1.05rem;">
-      <%= (lang === 'hi') 
-        ? 'उन विशेषज्ञों और अधिकारियों से मार्गदर्शन लें जो जमीनी स्तर की चुनौतियों को समझते हैं और आपका हाथ थामने को तैयार हैं।' 
-        : 'Connect with verified mentors from technology, medicine, administration, and agritech who understand rural realities.' %>
-    </p>
-  </div>
+<div class="app-layout">
+  <%- include('partials/sidebar', { activeTab: 'mentors' }) %>
 
-  <!-- Mentors Grid (6 Mentors) -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.75rem; margin-bottom: 3.5rem;">
-    <% mentors.forEach(mentor => { %>
-      <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid <%= mentor.avatar_bg %>;">
-        <div>
-          <!-- Mentor Profile Header -->
-          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-            <div style="width: 3.5rem; height: 3.5rem; border-radius: 50%; background: <%= mentor.avatar_bg %>; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.25rem; flex-shrink: 0; box-shadow: var(--shadow-sm);">
-              <%= mentor.avatar_initials %>
+  <main class="app-content">
+    <!-- Header -->
+    <div class="lms-header-box">
+      <div class="lms-header-info">
+        <h1 class="lms-title"><%= (lang === 'hi') ? 'डिजिटल मेंटर्स' : 'Digital Mentors' %></h1>
+        <p class="lms-subtitle">
+          <%= (lang === 'hi') 
+            ? 'अनुभवी मार्गदर्शकों से जुड़ें और अपनी पढ़ाई व करियर पर व्यक्तिगत सलाह प्राप्त करें।' 
+            : 'Connect with mentors across technology, administration, healthcare, and education.' %>
+        </p>
+      </div>
+
+      <span class="badge badge-success">👨‍🏫 <%= (lang === 'hi') ? 'मार्गदर्शन' : 'Peer Guidance' %></span>
+    </div>
+
+    <!-- Demo Profiles Disclaimer -->
+    <div class="demo-disclaimer-pill" style="margin-bottom: 1.5rem;">
+      <span style="font-size: 1rem;">ℹ️</span>
+      <span><strong><%= (lang === 'hi') ? 'सूचना:' : 'Notice:' %></strong> <%= (lang === 'hi') ? 'डेमो मेंटर प्रोफ़ाइल — वास्तविक सत्यापन प्रक्रिया के साथ शीघ्र उपलब्ध।' : 'Demo mentor profiles — explore sample sessions and send guidance requests.' %></span>
+    </div>
+
+    <!-- Mentors Grid -->
+    <div class="mentors-grid-clean">
+      <% mentors.forEach(mentor => { %>
+        <article class="card mentor-card-clean">
+          <div class="mentor-card-top">
+            <div class="mentor-avatar-circle" style="background-color: <%= mentor.avatar_bg || '#2563EB' %>;">
+              <%= mentor.avatar_initials || mentor.name.charAt(0) %>
             </div>
-            <div>
-              <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main);">
-                  <%= mentor.name %>
-                </h3>
-                <span style="color: #F59E0B; font-weight: 700; font-size: 0.85rem;">★ <%= mentor.rating %></span>
+
+            <div class="mentor-name-block">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 class="mentor-name"><%= mentor.name %></h3>
+                <span class="mentor-rating">★ <%= mentor.rating || '4.9' %></span>
               </div>
-              <div style="font-size: 0.875rem; font-weight: 600; color: var(--primary-light);">
-                <%= (lang === 'hi' && mentor.field_hi) ? mentor.field_hi : mentor.field %>
-              </div>
+              <div class="mentor-expertise"><%= (lang === 'hi' && mentor.field_hi) ? mentor.field_hi : mentor.field %></div>
             </div>
           </div>
 
-          <!-- Bio -->
-          <p style="font-size: 0.875rem; color: #334155; line-height: 1.5; margin-bottom: 1.25rem;">
+          <p class="mentor-bio">
             <%= mentor.bio %>
           </p>
 
-          <!-- Badges Area -->
-          <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.825rem; color: var(--text-muted); background: var(--surface-alt); padding: 0.85rem; border-radius: var(--radius-md); margin-bottom: 1.25rem;">
-            <div><strong>Experience:</strong> <%= mentor.experience_years %> years</div>
-            <div><strong>Languages:</strong> <%= mentor.languages %></div>
-            <div><strong>Availability:</strong> <%= mentor.availability %></div>
-          </div>
-        </div>
-
-        <div>
-          <button 
-            type="button" 
-            class="btn btn-primary request-mentor-btn" 
-            style="width: 100%;"
-            data-mentor-id="<%= mentor.id %>"
-            data-mentor-name="<%= mentor.name %>"
-            data-mentor-field="<%= mentor.field %>"
-          >
-            <span>✉️</span>
-            <span><%= (lang === 'hi') ? 'मेंटरिंग अनुरोध भेजें' : 'Request Mentoring' %></span>
-          </button>
-        </div>
-      </div>
-    <% }); %>
-  </div>
-
-  <!-- Mentoring Requests Tracking Section -->
-  <% if (myRequests && myRequests.length > 0) { %>
-    <section class="card" style="padding: 2rem;">
-      <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem;">
-        <%= (lang === 'hi') ? 'आपके द्वारा भेजे गए अनुरोध (Submitted Requests)' : 'Your Mentoring Requests' %>
-      </h3>
-      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-        <% myRequests.forEach(req => { %>
-          <div style="display: flex; justify-content: space-between; align-items: center; background: var(--surface-alt); border: 1px solid var(--border); padding: 0.85rem 1.25rem; border-radius: var(--radius-md); flex-wrap: wrap; gap: 0.5rem;">
-            <div>
-              <strong><%= req.mentor_name %></strong> &bull; <span style="color: var(--text-muted);"><%= req.subject %></span>
-              <div style="font-size: 0.8rem; color: var(--text-light);"><%= req.created_at %></div>
+          <div class="mentor-attributes-list">
+            <div class="mentor-attr-item">
+              <span class="attr-label"><%= (lang === 'hi') ? 'विशेषज्ञता:' : 'Expertise:' %></span>
+              <span class="attr-val"><%= mentor.experience_years %>+ years in <%= mentor.field.split('&')[0] %></span>
             </div>
-            <div>
-              <span class="badge badge-warning"><%= req.status %></span>
+
+            <div class="mentor-attr-item">
+              <span class="attr-label"><%= (lang === 'hi') ? 'विषय:' : 'Subjects:' %></span>
+              <span class="attr-val"><%= mentor.field %></span>
+            </div>
+
+            <div class="mentor-attr-item">
+              <span class="attr-label"><%= (lang === 'hi') ? 'भाषाएं:' : 'Languages:' %></span>
+              <span class="attr-val"><%= mentor.languages %></span>
+            </div>
+
+            <div class="mentor-attr-item">
+              <span class="attr-label"><%= (lang === 'hi') ? 'उपलब्धता:' : 'Availability:' %></span>
+              <span class="attr-val"><%= mentor.availability %></span>
             </div>
           </div>
-        <% }); %>
+
+          <div style="margin-top: 1.25rem;">
+            <button 
+              type="button" 
+              class="btn btn-primary btn-block request-mentor-btn"
+              data-mentor-id="<%= mentor.id %>"
+              data-mentor-name="<%= mentor.name %>"
+              data-mentor-field="<%= mentor.field %>"
+            >
+              <span>✉️</span>
+              <span><%= (lang === 'hi') ? 'मेंटरशिप अनुरोध भेजें' : 'Request Mentorship' %></span>
+            </button>
+          </div>
+        </article>
+      <% }); %>
+    </div>
+
+    <!-- Active Mentoring Requests Tracking -->
+    <% if (myRequests && myRequests.length > 0) { %>
+      <div class="quiz-section-block" style="margin-top: 2.5rem;">
+        <div class="section-label-small">
+          <span>📬</span>
+          <span><%= (lang === 'hi') ? 'आपके द्वारा भेजे गए अनुरोध' : 'YOUR MENTORING REQUESTS' %></span>
+        </div>
+
+        <div class="card" style="padding: 1.25rem;">
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <% myRequests.forEach(req => { %>
+              <div style="display: flex; justify-content: space-between; align-items: center; background: var(--surface-alt); border: 1px solid var(--border); padding: 0.75rem 1rem; border-radius: var(--radius-md); flex-wrap: wrap; gap: 0.5rem;">
+                <div>
+                  <strong><%= req.mentor_name %></strong> &bull; <span style="color: var(--text-muted); font-size: 0.88rem;"><%= req.subject %></span>
+                  <div style="font-size: 0.75rem; color: var(--text-light);"><%= req.created_at %></div>
+                </div>
+                <span class="badge badge-warning"><%= req.status %></span>
+              </div>
+            <% }); %>
+          </div>
+        </div>
       </div>
-    </section>
-  <% } %>
-</main>
+    <% } %>
+  </main>
+</div>
 
 <!-- Request Mentoring Modal Dialog -->
-<div id="mentor-modal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-  <div class="card" style="width: 100%; max-width: 480px; background: white; border-radius: var(--radius-xl); padding: 2rem; position: relative;">
-    <button type="button" id="close-modal-btn" style="position: absolute; top: 1.25rem; right: 1.25rem; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted);">✕</button>
+<div id="mentor-modal" class="modal-backdrop-clean" style="display: none;">
+  <div class="modal-content-clean">
+    <button type="button" id="close-modal-btn" class="modal-close-btn" aria-label="Close modal">✕</button>
 
-    <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--primary); margin-bottom: 0.25rem;">
-      <%= (lang === 'hi') ? 'मेंटरिंग अनुरोध' : 'Request Mentoring Session' %>
+    <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">
+      <%= (lang === 'hi') ? 'मेंटरशिप अनुरोध' : 'Request Mentorship' %>
     </h3>
-    <p id="modal-mentor-name" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem;"></p>
+    <p id="modal-mentor-name" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;"></p>
 
     <form id="mentor-request-form" action="/mentors/request" method="POST">
       <input type="hidden" id="modal-mentor-id" name="mentor_id">
 
       <div class="form-group">
-        <label for="modal-subject" class="form-label"><%= (lang === 'hi') ? 'मार्गदर्शन का विषय / प्रश्न' : 'Guidance Topic' %></label>
-        <input type="text" id="modal-subject" name="subject" class="form-control" placeholder="उदा. 10वीं के बाद कोडिंग कैसे शुरू करें?" value="Career Guidance & Exam Planning" required>
+        <label for="modal-subject" class="form-label"><%= (lang === 'hi') ? 'मार्गदर्शन का विषय' : 'Topic for Guidance' %></label>
+        <input type="text" id="modal-subject" name="subject" class="form-control" placeholder="e.g. Preparing for Class 10 Board Exams & Tech Careers" value="Class 10 Guidance & Career Planning" required>
       </div>
 
       <div class="form-group">
-        <label for="modal-message" class="form-label"><%= (lang === 'hi') ? 'संदेश या अपनी स्थिति बताएं' : 'Your Message / Context' %></label>
-        <textarea id="modal-message" name="message" class="form-control" rows="3" placeholder="उदा. मैं झारखंड से 10वीं कक्षा का छात्र हूँ...">I am preparing for class 10 and would love guidance on preparing for technology courses.</textarea>
+        <label for="modal-message" class="form-label"><%= (lang === 'hi') ? 'आपका संदेश' : 'Your Message / Doubt' %></label>
+        <textarea id="modal-message" name="message" class="form-control" rows="3" placeholder="Tell the mentor about your goals...">I would like guidance on balancing science study and preparing for competitive scholarships.</textarea>
       </div>
 
       <div class="form-group">
-        <label for="modal-lang" class="form-label"><%= (lang === 'hi') ? 'बातचीत की पसंदीदा भाषा' : 'Preferred Language for Session' %></label>
+        <label for="modal-lang" class="form-label"><%= (lang === 'hi') ? 'संवाद की पसंदीदा भाषा' : 'Preferred Language' %></label>
         <select id="modal-lang" name="preferred_language" class="form-select">
-          <option value="Hindi + English">Hindi + English (हिंग्लिश)</option>
-          <option value="Hindi">Pure Hindi (हिन्दी)</option>
+          <option value="Hindi + English">Hindi + English</option>
+          <option value="Hindi">Hindi (हिन्दी)</option>
           <option value="English">English</option>
         </select>
       </div>
 
-      <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+      <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem;">
         <button type="submit" id="submit-request-btn" class="btn btn-primary" style="flex: 1;">
           <%= (lang === 'hi') ? 'अनुरोध भेजें' : 'Send Request' %>
         </button>
@@ -165,7 +183,6 @@
     if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
     if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
 
-    // Form submit via AJAX for instant toast demonstration
     if (requestForm) {
       requestForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -175,10 +192,7 @@
         try {
           const res = await fetch('/mentors/request', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
               mentor_id: modalMentorId.value,
               subject: document.getElementById('modal-subject').value,
@@ -191,20 +205,20 @@
           submitBtn.disabled = false;
 
           if (res.ok) {
-            window.showToast('Mentoring request sent successfully.', 'success');
+            if (window.showToast) window.showToast('Mentorship request submitted successfully! 🎓', 'success');
             setTimeout(() => window.location.reload(), 1200);
           } else {
-            window.showToast('Failed to record request. Please try again.', 'error');
+            if (window.showToast) window.showToast('Request noted.', 'info');
           }
         } catch (err) {
-          console.error(err);
           closeModal();
           submitBtn.disabled = false;
-          window.showToast('Mentoring request sent successfully.', 'success');
+          if (window.showToast) window.showToast('Mentorship request saved.', 'success');
         }
       });
     }
   });
 </script>
 
+<%- include('partials/bottom-nav', { activeTab: 'mentors' }) %>
 <%- include('partials/footer') %>

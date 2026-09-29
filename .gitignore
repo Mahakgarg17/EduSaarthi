@@ -3,5 +3,6 @@ node_modules/
 database/*.db
 database/*.db-journal
 database/*.db-wal
+database/*.db-shm
 .DS_Store
 Thumbs.db

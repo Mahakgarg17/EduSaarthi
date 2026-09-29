@@ -95,7 +95,7 @@ router.post('/settings/save', (req, res) => {
 
   const lowDataBool = low_data === '1' || low_data === 'true' || low_data === true;
   const voiceEnabledBool = voice_enabled === '1' || voice_enabled === 'true' || voice_enabled === true;
-  const selectedLang = preferred_language || 'hi';
+  const selectedLang = preferred_language || 'en';
 
   req.session.lang = selectedLang;
   req.session.lowData = lowDataBool;

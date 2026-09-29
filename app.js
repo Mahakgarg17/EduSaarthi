@@ -46,8 +46,8 @@ app.use((req, res, next) => {
   const sessionLang = req.session ? req.session.lang : null;
   const userLang = req.session && req.session.user ? req.session.user.preferred_language : null;
   
-  // Deterministic priority: cookie > session > user preference > default 'hi'
-  const currentLangCode = cookieLang || sessionLang || userLang || 'hi';
+  // Deterministic priority: cookie > session > user preference > default 'en'
+  const currentLangCode = cookieLang || sessionLang || userLang || 'en';
   
   if (req.session) {
     req.session.lang = currentLangCode;
@@ -58,7 +58,7 @@ app.use((req, res, next) => {
   res.locals.lowData = req.session ? req.session.lowData : false;
   res.locals.supportedLanguages = i18n.SUPPORTED_LANGUAGES;
   res.locals.t = i18n.getTranslator(currentLangCode);
-  res.locals.currentLanguage = i18n.SUPPORTED_LANGUAGES.find(l => l.code === currentLangCode) || i18n.SUPPORTED_LANGUAGES[0];
+  res.locals.currentLanguage = i18n.SUPPORTED_LANGUAGES.find(l => l.code === currentLangCode) || i18n.SUPPORTED_LANGUAGES.find(l => l.code === 'en') || i18n.SUPPORTED_LANGUAGES[0];
   next();
 });
 

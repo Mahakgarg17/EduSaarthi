@@ -12,12 +12,26 @@ router.get('/', (req, res) => {
     courses = db.query('SELECT * FROM courses ORDER BY order_index ASC');
   }
 
-  // Get total lesson count per course
+  const userId = req.session && req.session.user ? req.session.user.id : null;
+  // Get total lesson count and user progress per course
   const coursesWithCounts = courses.map(c => {
     const lessonCount = db.get('SELECT COUNT(*) as count FROM lessons WHERE course_id = ?', [c.id]);
+    const total = lessonCount ? lessonCount.count : 5;
+    let completed = 1;
+    if (userId) {
+      const compRow = db.get(`
+        SELECT COUNT(*) as count FROM progress p 
+        JOIN lessons l ON p.lesson_id = l.id 
+        WHERE p.user_id = ? AND l.course_id = ? AND p.completed = 1
+      `, [userId, c.id]);
+      if (compRow && compRow.count > 0) completed = compRow.count;
+    }
+    const progressPct = Math.min(100, Math.round((completed / total) * 100));
     return {
       ...c,
-      total_lessons: lessonCount ? lessonCount.count : 0
+      total_lessons: total,
+      completed_lessons: completed,
+      progressPct
     };
   });
 

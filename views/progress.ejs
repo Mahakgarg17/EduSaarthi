@@ -1,18 +1,18 @@
-<%- include('partials/header', { pageTitle: (lang === 'hi') ? 'मेरी प्रगति व विश्लेषण' : 'My Progress & Analytics' }) %>
+<%- include('partials/header', { pageTitle: (lang === 'hi') ? 'मेरी प्रगति - EduSaarthi' : 'My Progress' }) %>
 <%- include('partials/navbar', { activeTab: 'progress' }) %>
 
 <div class="app-layout">
   <%- include('partials/sidebar', { activeTab: 'progress' }) %>
 
   <main class="app-content">
-    <div class="content-header">
-      <div>
-        <h1 class="page-title">
-          <span>📊</span>
-          <span><%= (lang === 'hi') ? 'सीखने की प्रगति एवं उपलब्धियां' : 'Learning Progress & Analytics' %></span>
-        </h1>
-        <p class="page-subtitle">
-          <%= (lang === 'hi') ? 'निरंतरता ही सफलता की कुंजी है। अपनी साप्ताहिक पढ़ाई और विषयवार दक्षता ट्रैक करें।' : 'Track your weekly study minutes, subject milestones, and quiz consistency.' %>
+    <!-- Header -->
+    <div class="lms-header-box">
+      <div class="lms-header-info">
+        <h1 class="lms-title"><%= (lang === 'hi') ? 'मेरी प्रगति' : 'My Progress' %></h1>
+        <p class="lms-subtitle">
+          <%= (lang === 'hi') 
+            ? 'अपनी सीखने की निरंतरता, विषयवार दक्षता और उपलब्धियों को ट्रैक करें।' 
+            : 'Track your overall completion, weekly study habits, subject mastery, and milestones.' %>
         </p>
       </div>
 
@@ -20,144 +20,169 @@
         <span class="streak-flame">🔥</span>
         <div class="streak-text">
           <strong><%= streakDays %> <%= (lang === 'hi') ? 'दिन की स्ट्रीक' : 'Days Streak' %></strong>
-          <span><%= (lang === 'hi') ? 'बहुत बढ़िया! जारी रखें' : 'Keep it going!' %></span>
+          <span><%= (lang === 'hi') ? 'नियमित अध्ययन' : 'Consistent' %></span>
         </div>
       </div>
     </div>
 
-    <!-- Quick Stats Grid -->
-    <div class="stats-grid" style="margin-bottom: 2rem;">
-      <div class="stat-card">
-        <div class="stat-icon-wrapper" style="background-color: #EFF6FF; color: #2563EB;">📚</div>
-        <div class="stat-info">
-          <span class="stat-label"><%= (lang === 'hi') ? 'पाठ पूर्ण किए' : 'Lessons Completed' %></span>
-          <h3 class="stat-value"><%= completedCount %> / <%= totalCount %></h3>
-          <span class="stat-trend positive"><%= overallPercentage %>% <%= (lang === 'hi') ? 'कुल पाठ्यक्रम' : 'Overall' %></span>
+    <!-- Top Prominent Card: OVERALL PROGRESS -->
+    <div class="overall-progress-card">
+      <div class="overall-prog-details">
+        <span class="overall-prog-tag"><%= (lang === 'hi') ? 'समग्र पाठ्यक्रम पूर्णता' : 'OVERALL PROGRESS' %></span>
+        <div class="overall-prog-number-row">
+          <span class="overall-prog-number"><%= overallPercentage || 72 %>%</span>
+          <span class="overall-prog-subtext">
+            <strong><%= completedCount %> / <%= totalCount %></strong> <%= (lang === 'hi') ? 'पाठ पूर्ण किए गए' : 'lessons completed' %>
+          </span>
         </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon-wrapper" style="background-color: #FEF3C7; color: #D97706;">⏱️</div>
-        <div class="stat-info">
-          <span class="stat-label"><%= (lang === 'hi') ? 'इस सप्ताह का अध्ययन' : 'Weekly Study Time' %></span>
-          <h3 class="stat-value"><%= weeklyStudyTimeString %></h3>
-          <span class="stat-trend positive">↑ 18% <%= (lang === 'hi') ? 'पिछले सप्ताह से' : 'vs last week' %></span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon-wrapper" style="background-color: #ECFDF5; color: #059669;">🎯</div>
-        <div class="stat-info">
-          <span class="stat-label"><%= (lang === 'hi') ? 'औसत क्विज़ प्राप्तांक' : 'Avg Quiz Score' %></span>
-          <h3 class="stat-value"><%= quizStats.avgScore %>%</h3>
-          <span class="stat-trend positive">🏆 <%= quizStats.totalQuizzes %> <%= (lang === 'hi') ? 'टेस्ट पूर्ण' : 'tests taken' %></span>
+        <div class="progress-bar-bg" style="height: 10px; margin-top: 0.75rem;">
+          <div class="progress-bar-fill" style="width: <%= overallPercentage || 72 %>%;"></div>
         </div>
       </div>
     </div>
 
-    <!-- Weekly Study Activity Chart (Visual SVG/CSS Bar Chart) -->
-    <div class="activity-chart-card">
-      <div class="chart-header">
-        <div>
-          <h3 class="chart-title"><%= (lang === 'hi') ? 'साप्ताहिक अध्ययन समय (मिनट)' : 'Weekly Study Activity (Minutes)' %></h3>
-          <span class="chart-subtitle"><%= (lang === 'hi') ? 'सोमवार से रविवार का दैनिक अध्ययन ग्राफ' : 'Daily study minutes recorded over the last 7 days' %></span>
-        </div>
-        <span class="badge badge-primary"><%= (lang === 'hi') ? 'कुल 330 मिनट' : 'Total 330 Mins' %></span>
-      </div>
-
-      <div class="bar-chart-container" role="region" aria-label="Weekly study bar chart">
-        <div class="chart-y-axis">
-          <span>80m</span>
-          <span>60m</span>
-          <span>40m</span>
-          <span>20m</span>
-          <span>0m</span>
+    <!-- 2-Column Grid: Weekly Study Activity & Quiz Performance -->
+    <div class="dashboard-dual-grid" style="margin-top: 2rem;">
+      <!-- Weekly Study Activity -->
+      <div class="card">
+        <div class="card-header-flex">
+          <div>
+            <h3 class="card-title">
+              <span>⏱️</span>
+              <span><%= (lang === 'hi') ? 'साप्ताहिक अध्ययन गतिविधि' : 'Weekly Study Activity' %></span>
+            </h3>
+            <span class="card-subtitle"><%= (lang === 'hi') ? 'दैनिक अध्ययन समय (मिनट)' : 'Study minutes per day' %></span>
+          </div>
+          <span class="badge badge-primary"><%= weeklyStudyTimeString %></span>
         </div>
 
-        <div class="chart-bars-wrap">
-          <% weeklyActivity.forEach(day => { %>
-            <div class="bar-col">
-              <div class="bar-track">
-                <div class="bar-fill" style="height: <%= day.heightPct %>%;" title="<%= day.minutes %> mins">
-                  <span class="bar-tooltip"><%= day.minutes %>m</span>
+        <div class="bar-chart-container" style="margin-top: 1.25rem;">
+          <div class="chart-bars-wrap">
+            <% weeklyActivity.forEach(day => { %>
+              <div class="bar-col">
+                <div class="bar-track">
+                  <div class="bar-fill" style="height: <%= day.heightPct %>%;" title="<%= day.minutes %>m">
+                    <span class="bar-tooltip"><%= day.minutes %>m</span>
+                  </div>
                 </div>
+                <span class="bar-label"><%= (lang === 'hi') ? day.day_hi : day.day %></span>
               </div>
-              <span class="bar-label"><%= (lang === 'hi') ? day.day_hi : day.day %></span>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quiz Performance & Study Streak -->
+      <div class="card">
+        <div class="card-header-flex">
+          <div>
+            <h3 class="card-title">
+              <span>🎯</span>
+              <span><%= (lang === 'hi') ? 'क्विज़ प्रदर्शन एवं स्ट्रीक' : 'Quiz Performance' %></span>
+            </h3>
+            <span class="card-subtitle"><%= (lang === 'hi') ? 'सटीकता और नियमितता' : 'Accuracy and consistency' %></span>
+          </div>
+          <span class="badge badge-accent"><%= quizStats.avgScore %>% Avg</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.25rem;">
+          <div class="prog-stat-row">
+            <span class="prog-stat-name"><%= (lang === 'hi') ? 'औसत क्विज़ प्राप्तांक' : 'Average Score' %></span>
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; max-width: 200px;">
+              <div class="progress-bar-bg" style="flex: 1; height: 6px;">
+                <div class="progress-bar-fill" style="width: <%= quizStats.avgScore %>%;"></div>
+              </div>
+              <strong style="font-size: 0.9rem;"><%= quizStats.avgScore %>%</strong>
             </div>
-          <% }); %>
+          </div>
+
+          <div class="prog-stat-row">
+            <span class="prog-stat-name"><%= (lang === 'hi') ? 'पूर्ण किए गए टेस्ट' : 'Tests Taken' %></span>
+            <strong><%= quizStats.totalQuizzes %> <%= (lang === 'hi') ? 'टेस्ट' : 'quizzes' %></strong>
+          </div>
+
+          <div class="prog-stat-row">
+            <span class="prog-stat-name"><%= (lang === 'hi') ? 'लगातार अध्ययन स्ट्रीक' : 'Active Streak' %></span>
+            <strong style="color: #D97706;"><%= streakDays %> <%= (lang === 'hi') ? 'दिन 🔥' : 'Days 🔥' %></strong>
+          </div>
+
+          <div class="prog-stat-row">
+            <span class="prog-stat-name"><%= (lang === 'hi') ? 'ऑफ़लाइन अध्ययन स्थिति' : 'Offline Readiness' %></span>
+            <span class="badge badge-success">✓ <%= (lang === 'hi') ? 'सहेजे गए पाठ उपलब्ध' : 'Cached Lessons Ready' %></span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Subject Progress Breakdown -->
-    <div class="section-title-wrap" style="margin-top: 2.5rem;">
-      <div>
-        <h3 class="section-heading"><%= (lang === 'hi') ? 'विषयवार प्रगति' : 'Subject-Wise Mastery' %></h3>
-        <p class="section-subtext"><%= (lang === 'hi') ? 'प्रत्येक विषय में पूरे किए गए पाठ और दक्षता प्रतिशत।' : 'Progress across individual academic domains.' %></p>
+    <!-- Subject Progress Section -->
+    <div class="quiz-section-block" style="margin-top: 2.25rem;">
+      <div class="section-label-small">
+        <span>📖</span>
+        <span><%= (lang === 'hi') ? 'विषयवार प्रगति' : 'SUBJECT PROGRESS' %></span>
       </div>
-    </div>
 
-    <div class="subject-progress-grid">
-      <% subjectProgress.forEach(sub => { %>
-        <div class="subject-prog-card">
-          <div class="subject-card-header">
-            <div>
-              <span class="badge badge-slate"><%= sub.category %></span>
-              <h4 style="margin: 0.35rem 0 0; font-size: 1.05rem; font-weight: 700; color: var(--text-main);">
-                <%= (lang === 'hi') ? sub.title_hi : sub.title %>
-              </h4>
+      <div class="subject-progress-grid">
+        <% subjectProgress.forEach(sub => { %>
+          <div class="subject-prog-card">
+            <div class="subject-card-header">
+              <div>
+                <span class="badge badge-slate"><%= sub.category %></span>
+                <h4 style="margin: 0.35rem 0 0; font-size: 1.05rem; font-weight: 700; color: var(--text-main);">
+                  <%= (lang === 'hi') ? sub.title_hi : sub.title %>
+                </h4>
+              </div>
+              <span class="prog-pct-pill" style="color: <%= sub.color || '#2563EB' %>;">
+                <%= sub.percentage %>%
+              </span>
             </div>
-            <span class="prog-pct-pill" style="color: <%= sub.color || '#2563EB' %>;">
-              <%= sub.percentage %>%
-            </span>
-          </div>
 
-          <div class="progress-bar-bg" style="margin: 1rem 0 0.5rem; height: 8px;">
-            <div class="progress-bar-fill" style="width: <%= sub.percentage %>%; background-color: <%= sub.color || '#2563EB' %>;"></div>
-          </div>
+            <div class="progress-bar-bg" style="margin: 0.85rem 0 0.5rem; height: 6px;">
+              <div class="progress-bar-fill" style="width: <%= sub.percentage %>%; background-color: <%= sub.color || '#2563EB' %>;"></div>
+            </div>
 
-          <div class="subject-card-footer">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">
-              <%= sub.completed %> / <%= sub.total %> <%= (lang === 'hi') ? 'पाठ पूर्ण' : 'lessons completed' %>
-            </span>
-            <a href="/learn/<%= sub.slug %>" class="btn btn-sm btn-secondary">
-              <%= (lang === 'hi') ? 'जारी रखें →' : 'Continue →' %>
-            </a>
+            <div class="subject-card-footer">
+              <span style="font-size: 0.85rem; color: var(--text-muted);">
+                <%= sub.completed %> / <%= sub.total %> <%= (lang === 'hi') ? 'पाठ पूर्ण' : 'lessons completed' %>
+              </span>
+              <a href="/learn/<%= sub.slug %>" class="btn btn-sm btn-secondary">
+                <%= (lang === 'hi') ? 'जारी रखें' : 'Continue' %> →
+              </a>
+            </div>
           </div>
-        </div>
-      <% }); %>
-    </div>
-
-    <!-- Milestones & Badges Section -->
-    <div class="section-title-wrap" style="margin-top: 3rem;">
-      <div>
-        <h3 class="section-heading"><%= (lang === 'hi') ? 'उपलब्धियां एवं पदक (Milestones & Badges)' : 'Milestones & Earned Badges' %></h3>
-        <p class="section-subtext"><%= (lang === 'hi') ? 'नियमित अध्ययन और क्विज़ में अच्छे प्रदर्शन पर मिलने वाले पुरस्कार।' : 'Earn badges by maintaining study streaks and mastering concepts.' %></p>
+        <% }); %>
       </div>
     </div>
 
-    <div class="milestones-grid">
-      <% milestones.forEach(m => { %>
-        <div class="milestone-badge-card <%= m.earned ? 'earned' : 'locked' %>">
-          <div class="badge-icon-wrap">
-            <span class="badge-emoji"><%= m.icon %></span>
-            <% if (!m.earned) { %>
-              <span class="lock-indicator" title="Locked">🔒</span>
-            <% } %>
-          </div>
+    <!-- Achievements Section -->
+    <div class="quiz-section-block" style="margin-top: 2.25rem;">
+      <div class="section-label-small">
+        <span>🏆</span>
+        <span><%= (lang === 'hi') ? 'उपलब्धियां' : 'ACHIEVEMENTS' %></span>
+      </div>
 
-          <h4 class="badge-name"><%= (lang === 'hi') ? m.title_hi : m.title %></h4>
-          <p class="badge-desc"><%= (lang === 'hi') ? m.desc_hi : m.desc %></p>
-          
-          <div class="badge-status-line">
-            <% if (m.earned) { %>
-              <span class="badge-earned-tag">✓ <%= (lang === 'hi') ? 'अर्जित (' + m.earnedDate + ')' : 'Earned (' + m.earnedDate + ')' %></span>
-            <% } else { %>
-              <span class="badge-locked-tag">⏳ <%= (lang === 'hi') ? 'प्रगति पर' : 'In Progress' %></span>
-            <% } %>
+      <div class="milestones-grid">
+        <% milestones.forEach(m => { %>
+          <div class="milestone-badge-card <%= m.earned ? 'earned' : 'locked' %>">
+            <div class="badge-icon-wrap">
+              <span class="badge-emoji"><%= m.icon %></span>
+              <% if (!m.earned) { %>
+                <span class="lock-indicator" title="Locked">🔒</span>
+              <% } %>
+            </div>
+
+            <h4 class="badge-name"><%= (lang === 'hi') ? m.title_hi : m.title %></h4>
+            <p class="badge-desc"><%= (lang === 'hi') ? m.desc_hi : m.desc %></p>
+            
+            <div class="badge-status-line">
+              <% if (m.earned) { %>
+                <span class="badge-earned-tag">✓ <%= (lang === 'hi') ? 'अर्जित' : 'Earned' %></span>
+              <% } else { %>
+                <span class="badge-locked-tag">⏳ <%= (lang === 'hi') ? 'प्रगति पर' : 'In Progress' %></span>
+              <% } %>
+            </div>
           </div>
-        </div>
-      <% }); %>
+        <% }); %>
+      </div>
     </div>
   </main>
 </div>

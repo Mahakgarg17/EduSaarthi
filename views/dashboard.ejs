@@ -5,7 +5,7 @@
   <%- include('partials/sidebar', { activeTab: 'dashboard' }) %>
 
   <main class="app-content">
-    <!-- Top Welcome Greeting & Motivation Section -->
+    <!-- Top Greeting Header -->
     <div class="dashboard-greeting-hero">
       <div class="greeting-text-box">
         <% 
@@ -14,72 +14,44 @@
           let greetingHi = 'शुभ संध्या';
           if (hour < 12) { greetingEn = 'Good morning'; greetingHi = 'शुभ प्रभात'; }
           else if (hour < 17) { greetingEn = 'Good afternoon'; greetingHi = 'शुभ दोपहर'; }
-          const studentFirstName = user && user.name ? user.name.split(' ')[0] : (lang === 'hi' ? 'राहुल' : 'Rahul');
+          const studentFirstName = user && user.name ? user.name.split(' ')[0] : (lang === 'hi' ? 'रोहित' : 'Rohit');
         %>
         <h1 class="greeting-main-title">
           <%= (lang === 'hi') ? `${greetingHi}, ${studentFirstName} 👋` : `${greetingEn}, ${studentFirstName} 👋` %>
         </h1>
         <p class="greeting-subtitle">
-          <%= (lang === 'hi') ? 'आज कुछ नया सीखने के लिए तैयार हैं?' : 'Ready to continue learning today?' %>
+          <%= (lang === 'hi') ? 'क्या आप आज की पढ़ाई जारी रखने के लिए तैयार हैं?' : 'Ready to continue learning?' %>
         </p>
-
-        <!-- Dynamic Motivational Quote Box -->
-        <div class="motivation-quote-pill">
-          <span class="quote-icon">✨</span>
-          <span class="quote-text">
-            <% 
-              const quotesHi = [
-                'प्रतिदिन की छोटी प्रगति एक दिन बड़ा परिणाम लाती है।',
-                'सफलता निरंतरता और अभ्यास की पहचान है।',
-                'ज्ञान बिना किसी बाधा के हर विद्यार्थी का अधिकार है।'
-              ];
-              const quotesEn = [
-                'Small progress every day becomes big progress.',
-                'Consistency is the DNA of true mastery.',
-                'Learning without barriers empowers your entire future.'
-              ];
-              const quoteIdx = Math.floor(Math.random() * quotesEn.length);
-            %>
-            <%= (lang === 'hi') ? quotesHi[quoteIdx] : quotesEn[quoteIdx] %>
-          </span>
-        </div>
-      </div>
-
-      <div class="greeting-quick-actions">
-        <a href="/tutor" class="btn btn-primary">
-          <span>🤖</span>
-          <span><%= (lang === 'hi') ? 'एआई ट्यूटर से पूछें' : 'Ask AI Tutor' %></span>
-        </a>
-        <a href="/quizzes" class="btn btn-secondary">
-          <span>📝</span>
-          <span><%= (lang === 'hi') ? 'आज का टेस्ट' : "Today's Quiz" %></span>
-        </a>
       </div>
     </div>
 
-    <!-- Hero Continue Learning Card -->
-    <div class="continue-learning-hero-card">
-      <div class="continue-tag">
+    <!-- 1. CONTINUE LEARNING: One Prominent Card Only -->
+    <div class="continue-learning-section">
+      <div class="section-label-small">
         <span>📖</span>
-        <span><%= (lang === 'hi') ? 'पढ़ाई जारी रखें' : 'Continue Learning' %></span>
+        <span><%= (lang === 'hi') ? 'पढ़ाई जारी रखें' : 'CONTINUE LEARNING' %></span>
       </div>
 
-      <div class="continue-hero-content">
-        <div class="continue-details">
-          <span class="course-category-badge"><%= continueLesson.course_title || 'Geography & Social Science' %></span>
-          <h2 class="continue-lesson-title">
-            <%= (lang === 'hi') ? (continueLesson.title_hi || continueLesson.title) : continueLesson.title %>
+      <div class="continue-card-primary">
+        <div class="continue-card-body">
+          <div class="continue-course-header">
+            <span class="badge badge-primary"><%= continueLesson.course_title || 'Human Geography' %></span>
+            <span class="badge badge-success">✓ <%= (lang === 'hi') ? 'ऑफ़लाइन उपलब्ध' : 'Available Offline' %></span>
+          </div>
+
+          <h2 class="continue-lesson-heading">
+            <%= (lang === 'hi') ? (continueLesson.title_hi || continueLesson.title) : (continueLesson.title || 'Chapter 3 — Population Distribution') %>
           </h2>
-          
+
           <div class="continue-progress-row">
             <div class="progress-bar-bg">
               <div class="progress-bar-fill" style="width: <%= continueLesson.progressPct || 68 %>%;"></div>
             </div>
-            <span class="progress-pct-text"><%= continueLesson.progressPct || 68 %>%</span>
+            <span class="progress-pct-badge"><%= continueLesson.progressPct || 68 %>% <%= (lang === 'hi') ? 'पूर्ण' : 'complete' %></span>
           </div>
         </div>
 
-        <div class="continue-action-wrap">
+        <div class="continue-card-action">
           <a href="/learn/lesson/<%= continueLesson.id || 1 %>" class="btn btn-primary btn-lg continue-btn">
             <span><%= (lang === 'hi') ? 'पढ़ना जारी रखें' : 'Continue Learning' %></span>
             <span>→</span>
@@ -88,222 +60,149 @@
       </div>
     </div>
 
-    <!-- Section: Your Learning Overview (Attractive Stat Cards) -->
-    <div class="section-title-wrap" style="margin-top: 2rem;">
-      <div>
-        <h3 class="section-heading"><%= (lang === 'hi') ? 'आपकी सीखने की समीक्षा' : 'Your Learning Overview' %></h3>
-        <p class="section-subtext"><%= (lang === 'hi') ? 'आपकी प्रगति और नियमितता का त्वरित सारांश।' : 'Real-time overview of courses, study streak, and test scores.' %></p>
+    <!-- 2. QUICK STATS: 4 Clean Stats -->
+    <div class="quick-stats-section" style="margin-top: 2rem;">
+      <div class="section-label-small">
+        <span>📊</span>
+        <span><%= (lang === 'hi') ? 'त्वरित आंकड़े' : 'QUICK STATS' %></span>
       </div>
-    </div>
 
-    <div class="stats-grid">
-      <!-- 1. Courses Completed -->
-      <div class="stat-card">
-        <div class="stat-icon-wrapper" style="background-color: #EFF6FF; color: #2563EB;">📚</div>
-        <div class="stat-info">
-          <span class="stat-label"><%= (lang === 'hi') ? 'कोर्स पूर्ण' : 'Courses' %></span>
-          <h3 class="stat-value"><%= (lang === 'hi') ? 'पूर्ण: ' + (stats.completedCourses || 4) : 'Completed: ' + (stats.completedCourses || 4) %></h3>
-          <span class="stat-trend positive">✓ <%= courses.length %> <%= (lang === 'hi') ? 'सक्रिय विषय' : 'Active Subjects' %></span>
+      <div class="stats-grid-4">
+        <!-- Stat 1: Courses -->
+        <div class="stat-card-clean">
+          <div class="stat-clean-icon" style="background-color: #EFF6FF; color: #2563EB;">📚</div>
+          <div class="stat-clean-details">
+            <span class="stat-clean-title"><%= (lang === 'hi') ? 'कोर्स' : 'Courses' %></span>
+            <strong class="stat-clean-value"><%= stats.completedCourses || 4 %> <%= (lang === 'hi') ? 'पूर्ण' : 'completed' %></strong>
+          </div>
         </div>
-      </div>
 
-      <!-- 2. Study Streak -->
-      <div class="stat-card">
-        <div class="stat-icon-wrapper" style="background-color: #FEF3C7; color: #D97706;">🎯</div>
-        <div class="stat-info">
-          <span class="stat-label"><%= (lang === 'hi') ? 'अध्ययन स्ट्रीक' : 'Study Streak' %></span>
-          <h3 class="stat-value"><%= stats.streakDays || 7 %> <%= (lang === 'hi') ? 'दिन' : 'days' %> 🔥</h3>
-          <span class="stat-trend positive">↑ <%= (lang === 'hi') ? 'लगातार पढ़ाई जारी' : 'Consistent learning' %></span>
+        <!-- Stat 2: Study Streak -->
+        <div class="stat-card-clean">
+          <div class="stat-clean-icon" style="background-color: #FEF3C7; color: #D97706;">🔥</div>
+          <div class="stat-clean-details">
+            <span class="stat-clean-title"><%= (lang === 'hi') ? 'अध्ययन स्ट्रीक' : 'Study Streak' %></span>
+            <strong class="stat-clean-value"><%= stats.streakDays || 7 %> <%= (lang === 'hi') ? 'दिन' : 'days' %></strong>
+          </div>
         </div>
-      </div>
 
-      <!-- 3. Study Time -->
-      <div class="stat-card">
-        <div class="stat-icon-wrapper" style="background-color: #F0FDF4; color: #16A34A;">⏱️</div>
-        <div class="stat-info">
-          <span class="stat-label"><%= (lang === 'hi') ? 'अध्ययन समय' : 'Study Time' %></span>
-          <h3 class="stat-value"><%= stats.studyTime || '12h 40m' %></h3>
-          <span class="stat-trend positive">✓ <%= (lang === 'hi') ? 'इस सप्ताह' : 'This week' %></span>
+        <!-- Stat 3: Quiz Average -->
+        <div class="stat-card-clean">
+          <div class="stat-clean-icon" style="background-color: #FAF5FF; color: #9333EA;">🎯</div>
+          <div class="stat-clean-details">
+            <span class="stat-clean-title"><%= (lang === 'hi') ? 'क्विज़ औसत' : 'Quiz Average' %></span>
+            <strong class="stat-clean-value"><%= stats.quizScore || 82 %>%</strong>
+          </div>
         </div>
-      </div>
 
-      <!-- 4. Quiz Score -->
-      <div class="stat-card">
-        <div class="stat-icon-wrapper" style="background-color: #FAF5FF; color: #9333EA;">🏆</div>
-        <div class="stat-info">
-          <span class="stat-label"><%= (lang === 'hi') ? 'क्विज़ स्कोर' : 'Quiz Score' %></span>
-          <h3 class="stat-value"><%= stats.quizScore || 82 %>%</h3>
-          <span class="stat-trend positive">🌟 <%= (lang === 'hi') ? 'उत्कृष्ट समझ' : 'Strong Concept' %></span>
+        <!-- Stat 4: Study Time -->
+        <div class="stat-card-clean">
+          <div class="stat-clean-icon" style="background-color: #ECFDF5; color: #059669;">⏱️</div>
+          <div class="stat-clean-details">
+            <span class="stat-clean-title"><%= (lang === 'hi') ? 'अध्ययन समय' : 'Study Time' %></span>
+            <strong class="stat-clean-value"><%= stats.studyTime || '12h 40m' %></strong>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Section: Today's Interactive Goals & Daily Challenge Row -->
+    <!-- 3. TODAY'S GOALS: Clean Interactive Checklist -->
     <div class="dashboard-dual-grid" style="margin-top: 2rem;">
-      <!-- Today's Goals Checklist Card -->
-      <div class="card goals-card">
+      <div class="card goals-card-clean">
         <div class="card-header-flex">
           <div>
             <h3 class="card-title">
               <span>🎯</span>
-              <span><%= (lang === 'hi') ? 'आज के लक्ष्य' : "Today's Goals" %></span>
+              <span><%= (lang === 'hi') ? 'आज के लक्ष्य' : "TODAY'S GOALS" %></span>
             </h3>
-            <span class="card-subtitle"><%= (lang === 'hi') ? 'प्रतिदिन 4 सरल लक्ष्य पूरे करें' : 'Target daily accomplishments' %></span>
+            <span class="card-subtitle"><%= (lang === 'hi') ? 'प्रतिदिन अपने लक्ष्य पूरे करें' : 'Daily learning checklist' %></span>
           </div>
-          <span class="badge badge-primary" id="goals-completed-counter">3/4 completed</span>
+          <span class="badge badge-primary" id="goals-completed-counter">2/3 <%= (lang === 'hi') ? 'पूर्ण' : 'completed' %></span>
         </div>
 
-        <div class="progress-bar-bg" style="height: 6px; margin: 0.75rem 0 1rem;">
-          <div class="progress-bar-fill" id="goals-progress-fill" style="width: 75%;"></div>
+        <div class="progress-bar-bg" style="height: 5px; margin: 0.75rem 0 1rem;">
+          <div class="progress-bar-fill" id="goals-progress-fill" style="width: 66%;"></div>
         </div>
 
         <div class="goals-list" role="list">
           <div class="goal-check-item" role="listitem">
             <input type="checkbox" class="goal-checkbox" id="goal-0" checked>
             <label for="goal-0" class="goal-label">
-              <span><%= (lang === 'hi') ? 'भूगोल अध्याय 3 के मुख्य बिंदु पढ़ें' : 'Complete Geography Chapter 3' %></span>
+              <span><%= (lang === 'hi') ? 'एक पाठ पूरा करें' : 'Complete one lesson' %></span>
             </label>
           </div>
 
           <div class="goal-check-item" role="listitem">
             <input type="checkbox" class="goal-checkbox" id="goal-1" checked>
             <label for="goal-1" class="goal-label">
-              <span><%= (lang === 'hi') ? 'आज का 5 प्रश्नों का टेस्ट दें' : "Attempt today's daily quiz" %></span>
+              <span><%= (lang === 'hi') ? 'आज का दैनिक क्विज़ दें' : "Take today's quiz" %></span>
             </label>
           </div>
 
           <div class="goal-check-item" role="listitem">
-            <input type="checkbox" class="goal-checkbox" id="goal-2" checked>
+            <input type="checkbox" class="goal-checkbox" id="goal-2">
             <label for="goal-2" class="goal-label">
-              <span><%= (lang === 'hi') ? 'एआई ट्यूटर से 1 कठिन सवाल पूछें' : 'Ask AI Tutor one doubt' %></span>
-            </label>
-          </div>
-
-          <div class="goal-check-item" role="listitem">
-            <input type="checkbox" class="goal-checkbox" id="goal-3">
-            <label for="goal-3" class="goal-label">
-              <span><%= (lang === 'hi') ? '45 मिनट एकाग्रता से अध्ययन करें' : 'Study for 45 minutes' %></span>
+              <span><%= (lang === 'hi') ? 'कल के विषय की समीक्षा करें' : "Review yesterday's topic" %></span>
             </label>
           </div>
         </div>
       </div>
 
-      <!-- Daily Challenge Card -->
+      <!-- Daily Challenge Quick Launcher -->
       <% if (dailyChallenge) { %>
-        <div class="card daily-challenge-compact-card">
-          <div class="challenge-pill-badge">
-            <span>🔥</span>
-            <span><%= (lang === 'hi') ? 'दैनिक चुनौती' : 'Daily Challenge' %></span>
+        <div class="card daily-challenge-clean">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span class="badge badge-accent">⚡ <%= (lang === 'hi') ? 'दैनिक चुनौती' : "Today's Challenge" %></span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">⏱️ <%= dailyChallenge.time_limit_minutes %>m</span>
           </div>
-
-          <div style="margin-top: 0.75rem;">
-            <span class="badge badge-slate"><%= dailyChallenge.category %></span>
-            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0.4rem 0 0.5rem;">
-              <%= (lang === 'hi') ? dailyChallenge.title_hi : dailyChallenge.title %>
-            </h3>
-            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem;">
-              <%= (lang === 'hi') ? dailyChallenge.description_hi : dailyChallenge.description %>
-            </p>
-          </div>
-
-          <div class="challenge-specs">
-            <span>⏱️ <%= dailyChallenge.time_limit_minutes %>m</span>
-            <span>•</span>
-            <span>❓ 5 <%= (lang === 'hi') ? 'प्रश्न' : 'Questions' %></span>
-            <span>•</span>
-            <span class="difficulty-tag <%= dailyChallenge.difficulty.toLowerCase() %>"><%= dailyChallenge.difficulty %></span>
-          </div>
-
-          <div style="margin-top: 1.25rem;">
-            <a href="/quizzes/take/<%= dailyChallenge.slug %>" class="btn btn-primary btn-block">
-              <span>⚡ <%= (lang === 'hi') ? 'चुनौती हल करें' : 'Take Daily Challenge' %></span>
-              <span>→</span>
-            </a>
-          </div>
+          <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;">
+            <%= (lang === 'hi') ? dailyChallenge.title_hi : dailyChallenge.title %>
+          </h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem;">
+            <%= (lang === 'hi') ? dailyChallenge.description_hi : dailyChallenge.description %>
+          </p>
+          <a href="/quizzes/take/<%= dailyChallenge.slug %>" class="btn btn-primary btn-block">
+            <span><%= (lang === 'hi') ? 'क्विज़ शुरू करें' : 'Start Quiz' %></span>
+            <span>→</span>
+          </a>
         </div>
       <% } %>
     </div>
 
-    <!-- Section: Continue Learning Course Cards (3-4 Courses) -->
-    <div class="section-title-wrap" style="margin-top: 2.5rem;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%;">
-        <div>
-          <h3 class="section-heading"><%= (lang === 'hi') ? 'पाठ्यक्रम जारी रखें' : 'Continue Learning' %></h3>
-          <p class="section-subtext"><%= (lang === 'hi') ? 'अपनी गति से अध्ययन करें। पाठ ऑफ़लाइन भी उपलब्ध हैं।' : 'Resume your courses right where you left off.' %></p>
-        </div>
-        <a href="/learn" class="btn btn-sm btn-secondary"><%= (lang === 'hi') ? 'सभी विषय देखें →' : 'View All →' %></a>
+    <!-- 4. QUICK ACTIONS: Simple, Clean Action Grid -->
+    <div class="quick-actions-section" style="margin-top: 2rem;">
+      <div class="section-label-small">
+        <span>⚡</span>
+        <span><%= (lang === 'hi') ? 'त्वरित क्रियाएँ' : 'QUICK ACTIONS' %></span>
+      </div>
+
+      <div class="quick-actions-clean-grid">
+        <a href="/tutor" class="quick-action-clean-item">
+          <span class="qa-icon" style="background: #EFF6FF; color: #2563EB;">🤖</span>
+          <span class="qa-title"><%= (lang === 'hi') ? 'एआई से पूछें' : 'Ask AI' %></span>
+        </a>
+
+        <a href="/quizzes" class="quick-action-clean-item">
+          <span class="qa-icon" style="background: #FAF5FF; color: #9333EA;">📝</span>
+          <span class="qa-title"><%= (lang === 'hi') ? 'क्विज़ दें' : 'Take Quiz' %></span>
+        </a>
+
+        <a href="/learn" class="quick-action-clean-item">
+          <span class="qa-icon" style="background: #ECFDF5; color: #059669;">📚</span>
+          <span class="qa-title"><%= (lang === 'hi') ? 'पाठ्यक्रम' : 'Learn' %></span>
+        </a>
+
+        <a href="/scholarships" class="quick-action-clean-item">
+          <span class="qa-icon" style="background: #FEF3C7; color: #D97706;">💰</span>
+          <span class="qa-title"><%= (lang === 'hi') ? 'छात्रवृत्तियां' : 'Scholarships' %></span>
+        </a>
+
+        <a href="/career" class="quick-action-clean-item">
+          <span class="qa-icon" style="background: #FEE2E2; color: #DC2626;">🎯</span>
+          <span class="qa-title"><%= (lang === 'hi') ? 'करियर' : 'Career' %></span>
+        </a>
       </div>
     </div>
-
-    <div class="course-grid">
-      <% courses.slice(0, 3).forEach(course => { %>
-        <div class="card course-card">
-          <div class="course-card-top">
-            <span class="category-pill" style="border-left: 3px solid <%= course.color %>;">
-              <%= course.category %>
-            </span>
-            <span class="badge badge-success" style="font-size: 0.72rem;">✓ PWA Offline</span>
-          </div>
-
-          <h4 class="course-card-title">
-            <%= (lang === 'hi') ? course.title_hi : course.title %>
-          </h4>
-
-          <div class="course-progress-block">
-            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">
-              <span style="color: var(--text-muted);"><%= course.completed_lessons %> / <%= course.total_lessons %> <%= (lang === 'hi') ? 'पाठ पूर्ण' : 'lessons completed' %></span>
-              <span style="color: <%= course.color %>;"><%= course.progressPct %>%</span>
-            </div>
-            <div class="progress-bar-bg">
-              <div class="progress-bar-fill" style="width: <%= course.progressPct %>%; background-color: <%= course.color %>;"></div>
-            </div>
-          </div>
-
-          <div class="course-card-footer">
-            <span style="font-size: 0.8rem; color: var(--text-muted);">
-              ⏱️ ~<%= course.estTimeText %> <%= (lang === 'hi') ? 'शेष' : 'remaining' %>
-            </span>
-            <a href="/learn/<%= course.slug %>" class="btn btn-sm btn-outline-primary">
-              <%= (lang === 'hi') ? 'पढ़ें →' : 'Resume →' %>
-            </a>
-          </div>
-        </div>
-      <% }); %>
-    </div>
-
-    <!-- Section: Scholarships and Opportunities Preview -->
-    <% if (scholarshipsPreview && scholarshipsPreview.length > 0) { %>
-      <div class="section-title-wrap" style="margin-top: 2.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%;">
-          <div>
-            <h3 class="section-heading"><%= (lang === 'hi') ? 'पात्र सरकारी छात्रवृत्तियां' : 'Recommended Scholarships For You' %></h3>
-            <p class="section-subtext"><%= (lang === 'hi') ? 'आपके राज्य और कक्षा के अनुसार अनुशंसित आर्थिक सहायता योजनाएं।' : 'Financial assistance matched to your profile and location.' %></p>
-          </div>
-          <a href="/scholarships" class="btn btn-sm btn-secondary"><%= (lang === 'hi') ? 'सभी छात्रवृत्तियां देखें →' : 'View All →' %></a>
-        </div>
-      </div>
-
-      <div class="scholarship-grid">
-        <% scholarshipsPreview.slice(0, 3).forEach(s => { %>
-          <div class="card scholarship-card">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-              <span class="badge badge-primary"><%= s.category %></span>
-              <span class="badge badge-accent">💰 <%= s.benefit_amount %></span>
-            </div>
-            <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;">
-              <%= (lang === 'hi') ? s.name_hi : s.name %>
-            </h4>
-            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem;">
-              <%= (lang === 'hi') ? s.description_hi : s.description %>
-            </p>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 0.75rem;">
-              <span style="font-size: 0.8rem; color: var(--text-muted);">📅 <%= (lang === 'hi') ? 'अंतिम तिथि:' : 'Deadline:' %> <%= s.deadline %></span>
-              <a href="/scholarships" class="btn btn-sm btn-outline-primary"><%= (lang === 'hi') ? 'विवरण' : 'Details' %></a>
-            </div>
-          </div>
-        <% }); %>
-      </div>
-    <% } %>
   </main>
 </div>
 

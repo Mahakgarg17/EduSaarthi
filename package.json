@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "seed": "node database/seed.js",
-    "test": "node tests/test-routes.js"
+    "test": "node tests/test-routes.js && node tests/test-language-persistence.js"
   },
   "keywords": [
     "edtech",
