@@ -9,14 +9,19 @@ yarn-error.log*
 .env.local
 .env.*.local
 *.env
+!.env.example
 
-# SQLite local database files and write-ahead logs (contains local user data)
+# SQLite local database files and write-ahead logs
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
 database/*.db
 database/*.db-journal
 database/*.db-wal
 database/*.db-shm
-*.sqlite
-*.sqlite3
 
 # Logs
 logs/
